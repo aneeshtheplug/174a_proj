@@ -55,12 +55,12 @@ public class TestConnection {
                 // --- Simple test routine ---
                 System.out.println("-- Adding test student and course offering --");
                 dao.addStudent("0001001", "Test", "Student", "123 Test Ave", "CS", "CS");
-                dao.addCourseOffering(500, "CS101", "ENGR", "201", "MWF", 900, 1, 2025, 40, "Prof", "X");
-                dao.addCourseOffering(505, "CS101", "ENGR", "201", "MWF", 900, 1, 2025, 40, "Prof", "X");
+                dao.addCourseOffering(500, "CS101", "ENGR", "201", "MWF", 900, 1, 2025, 2, "Prof", "X");
+                dao.addCourseOffering(505, "CS101", "ENGR", "201", "MWF", 900, 1, 2025, 2, "Prof", "X");
 
                 System.out.println("-- Enrolling student in course --");
-                // dao.enrollStudentInCourse("0001001", 500);
-                // dao.enrollStudentInCourse("0001001", 505);
+                dao.enrollStudentInCourse("0001001", 500);
+                dao.enrollStudentInCourse("0001001", 505);
                 List<UniversityDAO.CourseOffering> current = dao.listCurrentCourses("0001001");
                 System.out.println("Currently enrolled courses: " + current.size());
 
@@ -1006,19 +1006,21 @@ class UniversityDAO {
     public void clearAllData() throws SQLException {
         try (Statement stmt = conn.createStatement()) {
             // delete from the most dependent tables first:
-            stmt.executeUpdate("DELETE FROM Completed_Course");
             stmt.executeUpdate("DELETE FROM Currently_Enrolled");
+            stmt.executeUpdate("DELETE FROM Completed_Course");
             stmt.executeUpdate("DELETE FROM Course_Offerings");
-            stmt.executeUpdate("DELETE FROM Settings");
+            stmt.executeUpdate("DELETE FROM Is_Prerequisite");
+
             stmt.executeUpdate("DELETE FROM Mandatory_Major_Courses");
             stmt.executeUpdate("DELETE FROM Major_Electives");
-            stmt.executeUpdate("DELETE FROM Is_Prerequisite");
-            // then the “leaf” master tables:
-            stmt.executeUpdate("DELETE FROM Courses");
             stmt.executeUpdate("DELETE FROM Students");
             stmt.executeUpdate("DELETE FROM Major");
-            stmt.executeUpdate("DELETE FROM Department");
+
+            // then the “leaf” master tables:
+            stmt.executeUpdate("DELETE FROM Courses");
+            stmt.executeUpdate("DELETE FROM Settings");
             stmt.executeUpdate("DELETE FROM Terms");
+            stmt.executeUpdate("DELETE FROM Department");
         }
         System.out.println("🗑️  All tables cleared.");
     }
