@@ -252,7 +252,7 @@ public class ConsoleUI {
                 
             
                 case "6":
-                    System.out.println("Making a graduation plan...");
+                    System.out.println("Making a graduation plan:");
                     try {
                         UniversityDAO.StudyPlan plan = dao.generateStudyPlan(String.valueOf(perm));
                 
