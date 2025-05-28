@@ -1,5 +1,8 @@
 package org.yourcompany.yourproject;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -9,6 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import org.yourcompany.yourproject.UniversityDAO.GradeEntry;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import oracle.jdbc.OracleConnection;
@@ -43,32 +48,94 @@ public class TestConnection {
                 System.out.println("-- Clearing existing data --");
                 dao.clearAllData();
 
-                // --- Adding foundational data ---
-                System.out.println("-- Adding foundational data --");
+                System.out.println("-- Loading static setup --");
+                // 1) Departments & Majors
                 dao.addDepartment("CS");
-                dao.addDepartment("MATH");
-                dao.addMajor("CS", "CS", 3);
-                dao.addCourse("CS101", "Intro to Programming");
+                dao.addDepartment("ECE");
+                dao.addMajor("CS",  "CS", 5);
+                dao.addMajor("ECE", "ECE", 5);
+
+                // 2) Master Course List
+                String[] courses = { "CS174","CS170","CS160","CS026","EC154","EC140","EC015" };
+                for (String c : courses) {
+                    dao.addCourse(c, c);
+                }
+
+                // 3) Terms
+                dao.addTerm(4, 2024); // Fall 2024
                 dao.addTerm(1, 2025); // Winter 2025
+                dao.addTerm(2, 2025); // Spring 2025
+
+                // 4) Classroom Settings
+                dao.addSetting("Psycho","1132","TR",1000,1200);
+                dao.addSetting("English","1124","MWF",1000,1100);
+                dao.addSetting("Engr","1132","MWF",1400,1500);
+                dao.addSetting("Bio","2222","MWF",1400,1500);
+                dao.addSetting("Maths","3333","T",1500,1700);
+                dao.addSetting("Chem","1234","TR",1300,1500);
+                dao.addSetting("Engr","2116","MW",1100,1300);
+
+                Object[][] students = {
+                    {"12345","Alfred","Hitchcock","12345","6667 El Colegio #40","CS","CS"},
+                    {"14682","Billy","Clinton","14682","5777 Hollister","ECE","ECE"},
+                    {"37642","Cindy","Laugher","37642","7000 Hollister","CS","CS"},
+                    {"85821","David","Copperfill","85821","1357 State St","CS","CS"},
+                    {"38567","Elizabeth","Sailor","38567","4321 State St","ECE","ECE"},
+                    {"81934","Fatal","Castro","81934","3756 La Cumbre Plaza","CS","CS"},
+                    {"98246","George","Brush","98246","5346 Foothill Av","CS","CS"},
+                    {"35328","Hurryson","Ford","35328","678 State St","ECE","ECE"},
+                    {"84713","Ivan","Lendme","84713","1235 Johnson Dr","ECE","ECE"},
+                    {"36912","Joe","Pepsi","36912","3210 State St","CS","CS"},
+                    {"46590","Kelvin","Coster","46590","Santa Cruz #3579","CS","CS"},
+                    {"91734","Li","Kung","91734","2 People's Rd Beijing","ECE","ECE"},
+                    {"73521","Magic","Jordon","73521","3852 Court Rd","CS","CS"},
+                    {"53540","Nam-hoi","Chung","53540","1997 People's St HK","CS","CS"},
+                    {"82452","Olive","Stoner","82452","6689 El Colegio #151","ECE","ECE"},
+                    {"18221","Pit","Wilson","18221","911 State St","ECE","ECE"}
+                };
+
+                for (Object[] s : students) {
+                    dao.addStudent(
+                        (String) s[0], // perm
+                        (String) s[1], // firstName
+                        (String) s[2], // lastName
+                        (String) s[3], // rawPin
+                        (String) s[4], // address
+                        (String) s[5], // dname
+                        (String) s[6]  // mname
+                    );
+                }
+
+                System.out.println("-- Adding historical offerings --");
+                // Fall 2024 offerings
+
                 dao.addSetting("ENGR", "201", "MWF", 900, 950);
 
                 // --- Simple test routine ---
                 System.out.println("-- Adding test student and course offering --");
-                dao.addStudent("0001001", "Test", "Student", "123 Test Ave", "CS", "CS");
-                dao.addCourseOffering(500, "CS101", "ENGR", "201", "MWF", 900, 1, 2025, 2, "Prof", "X");
-                dao.addCourseOffering(505, "CS101", "ENGR", "201", "MWF", 900, 1, 2025, 2, "Prof", "X");
+                dao.addCourseOffering(87654, "CS026", "Bio", "2222", "MWF", 1400, 4, 2024, 8, "Saturn", "");
+                dao.addCourseOffering(13579, "CS160", "Engr", "1132", "MWF", 1400, 4, 2024, 8, "Mercury", "");
+                dao.addCourseOffering(97531, "EC140", "Chem", "1234", "TR", 1300, 4, 2024, 10, "Gold", "");
+                dao.addCourseOffering(24680, "CS170", "English", "1124", "MWF", 1000, 1, 2025, 8, "Jupiter", "");
+                dao.addCourseOffering(86420, "EC015", "Engr", "2116", "MW", 1100, 1, 2025, 8, "Silver", "");
 
-                System.out.println("-- Enrolling student in course --");
-                dao.enrollStudentInCourse("0001001", 500);
-                dao.enrollStudentInCourse("0001001", 505);
-                List<UniversityDAO.CourseOffering> current = dao.listCurrentCourses("0001001");
-                System.out.println("Currently enrolled courses: " + current.size());
+                // System.out.println("-- Populating completed courses (historical) --");
+                // // Fall 2024 grades for offering 87654
+                // List<GradeEntry> grades87654 = Arrays.asList(
+                //     new GradeEntry("12345","A"),
+                //     new GradeEntry("14682","B"),
+                //     new GradeEntry("37642","A-")
+                // );
+                // dao.enterGrades(87654, grades87654);
 
-                System.out.println("-- Testing PIN verification --");
-                boolean pinValid = dao.verifyPin("0001001", "00000");
-                System.out.println("Default PIN valid: " + pinValid);
+                // // Winter 2025 grades for offering 24680
+                // List<GradeEntry> grades24680 = Arrays.asList(
+                //     new GradeEntry("12345","B+"),
+                //     new GradeEntry("37642","A")
+                // );
+                // dao.enterGrades(24680, grades24680);
 
-                System.out.println("✅ All test operations complete!");
+                System.out.println("✅ Sample data (including history) loaded!");
             }
         } catch (SQLException e) {
             System.err.println("ERROR during test run:");
@@ -190,53 +257,73 @@ class UniversityDAO {
         }
     }
 
+    /**
+     * Verify student PIN (for authentication).
+     */
+    private String hashPin(String rawPin) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(rawPin.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not available", e);
+        }
+    }
+
     // ============ STUDENT MANAGEMENT ============
     
     /**
-     * Add a new student (pin defaults to '0000').
+     * Add a new student (pin defaults to '00000').
      */
-    public void addStudent(String perm, String firstName, String lastName,
-                           String address, String dname, String mname) throws SQLException {
-        String sql = "INSERT INTO Students (perm, sname_first, sname_last, pin, address, dname, mname) " +
-                     "VALUES (?, ?, ?, '00000', ?, ?, ?)";
+    public void addStudent(String perm, String firstName, String lastName, String rawPin, String address, String dname, String mname) throws SQLException {
+        // hash the PIN
+        String pinHash = hashPin(rawPin);
+
+        String sql = "INSERT INTO Students "
+                + "(perm, sname_first, sname_last, pin, address, dname, mname) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, perm);
             ps.setString(2, firstName);
             ps.setString(3, lastName);
-            ps.setString(4, address);
-            ps.setString(5, dname);
-            ps.setString(6, mname);
+            ps.setString(4, pinHash);
+            ps.setString(5, address);
+            ps.setString(6, dname);
+            ps.setString(7, mname);
             ps.executeUpdate();
         }
     }
 
-    /**
-     * Verify student PIN (for authentication).
-     */
-    public boolean verifyPin(String perm, String pin) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Students WHERE perm = ? AND pin = ?";
+    /** Verify that the provided rawPin (5 digits) matches the stored hash */
+    public boolean verifyPin(String perm, String rawPin) throws SQLException {
+        String sql = "SELECT pin FROM Students WHERE perm = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, perm);
-            ps.setString(2, pin);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt(1) > 0;
+                if (!rs.next()) return false;               // no such student
+                String storedHash = rs.getString("pin");
+                String candidateHash = hashPin(rawPin);
+                return storedHash.equals(candidateHash);
             }
         }
     }
 
-    /**
-     * Change student PIN.
-     */
-    public boolean setPin(String perm, String oldPin, String newPin) throws SQLException {
-        if (!verifyPin(perm, oldPin)) {
+    /** Change student PIN: only store the hash of the new PIN */
+    public boolean setPin(String perm, String oldRawPin, String newRawPin) throws SQLException {
+        // first verify old PIN
+        if (!verifyPin(perm, oldRawPin)) {
             return false;
         }
+        String newHash = hashPin(newRawPin);
         String sql = "UPDATE Students SET pin = ? WHERE perm = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, newPin);
+            ps.setString(1, newHash);
             ps.setString(2, perm);
-            return ps.executeUpdate() > 0;
+            return ps.executeUpdate() == 1;
         }
     }
 
