@@ -10,8 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
+import org.yourcompany.yourproject.UniversityDAO.GradeEntry;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import oracle.jdbc.OracleConnection;
@@ -143,8 +146,268 @@ public class TestConnection {
                 dao.addCourseOffering(71631, "EC015", "Engr",  "1124","TR", 1400, 4, 2024, 15, "Moon",   "");
                 dao.addCourseOffering(82612, "EC010", "Physics","4004","MWF", 800, 4, 2024, 15, "Earth","");
 
-                
+                                // --- Prerequisites (Spring ’25) ---
+                System.out.println("-- Adding prerequisites --");
+                dao.addPrerequisite("CS174", "CS130");
+                dao.addPrerequisite("CS174", "CS026");
+                dao.addPrerequisite("CS170", "CS130");
+                dao.addPrerequisite("CS170", "CS154");
+                dao.addPrerequisite("CS160", "CS026");
+                dao.addPrerequisite("EC154", "CS026");
+                dao.addPrerequisite("EC154", "EC152");
 
+                // --- Major requirements (Part 3) ---
+                System.out.println("-- Adding major requirements --");
+                String[] required = {"CS026","CS130","CS154","CS160","CS170"};
+                String[] electives = {"CS010","EC010","EC015","EC140","EC152","EC154","CS174"};
+                for (String req : required) {
+                    dao.addMandatoryCourse("CS",  req);
+                    dao.addMandatoryCourse("ECE", req);
+                }
+                for (String ele : electives) {
+                    dao.addMajorElective("CS",  ele);
+                    dao.addMajorElective("ECE", ele);
+                }
+
+                // --- Seeding historical “Taken” enrollments & grades ---
+                // (Fall 2024: quarter=4, year=2024; Winter 2025: quarter=1, year=2025)
+
+                System.out.println("-- Loading Fall 2024 completed courses --");
+                // Alfred Hitchcock (perm=12345): CS026 A, CS010 A :contentReference[oaicite:0]{index=0}
+                dao.enrollStudentInCourse("12345", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 76543, 4, 2024, "A")
+                ));
+                dao.enrollStudentInCourse("12345", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 81623, 4, 2024, "A")
+                ));
+                dao.enrollStudentInCourse("12345", 91823, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 91823, 4, 2024, "A")
+                ));
+
+                // Billy Clinton (perm=14682): CS026 B, CS010 A :contentReference[oaicite:1]{index=1}
+                dao.enrollStudentInCourse("14682", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 76543, 4, 2024, "B")
+                ));
+                dao.enrollStudentInCourse("14682", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 81623, 4, 2024, "A")
+                ));
+
+                // Cindy Laugher (perm=37642): EC015 B, EC010 A :contentReference[oaicite:2]{index=2}
+                dao.enrollStudentInCourse("37642", 71631, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 71631, 4, 2024, "B")
+                ));
+                dao.enrollStudentInCourse("37642", 82612, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 82612, 4, 2024, "A")
+                ));
+
+                // David Copperfill (perm=85821): CS010 A, EC015 B :contentReference[oaicite:3]{index=3}
+                dao.enrollStudentInCourse("85821", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 81623, 4, 2024, "A")
+                ));
+                dao.enrollStudentInCourse("85821", 71631, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 71631, 4, 2024, "B")
+                ));
+
+                // Elizabeth Sailor (perm=38567): EC152 B, CS154 B :contentReference[oaicite:4]{index=4}
+                dao.enrollStudentInCourse("38567", 91823, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 91823, 4, 2024, "B")
+                ));
+                dao.enrollStudentInCourse("38567", 32165, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 32165, 4, 2024, "B")
+                ));
+
+                // Fatal Castro (perm=81934): CS026 A, EC152 B :contentReference[oaicite:5]{index=5}
+                dao.enrollStudentInCourse("81934", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 76543, 4, 2024, "A")
+                ));
+                dao.enrollStudentInCourse("81934", 91823, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 91823, 4, 2024, "B")
+                ));
+
+                // George Brush (perm=98246): CS154 A, CS130 B, CS026 A :contentReference[oaicite:6]{index=6}
+                dao.enrollStudentInCourse("98246", 32165, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 32165, 4, 2024, "A")
+                ));
+                dao.enrollStudentInCourse("98246", 56789, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 56789, 4, 2024, "B")
+                ));
+                dao.enrollStudentInCourse("98246", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 76543, 4, 2024, "A")
+                ));
+
+                // Hurryson Ford (perm=35328): CS130 B, CS026 A :contentReference[oaicite:7]{index=7}
+                dao.enrollStudentInCourse("35328", 56789, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("35328", 56789, 4, 2024, "B")
+                ));
+                dao.enrollStudentInCourse("35328", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("35328", 76543, 4, 2024, "A")
+                ));
+
+                // Ivan Lendme (perm=84713): EC015 F, CS010 C :contentReference[oaicite:8]{index=8}
+                dao.enrollStudentInCourse("84713", 71631, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("84713", 71631, 4, 2024, "F")
+                ));
+                dao.enrollStudentInCourse("84713", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("84713", 81623, 4, 2024, "C")
+                ));
+
+
+                // --- Now Winter 2025 completed courses ---
+                System.out.println("-- Loading Winter 2025 completed courses --");
+                // Alfred Hitchcock (perm=12345): CS154 A, CS130 B, EC154 C :contentReference[oaicite:9]{index=9}
+                dao.enrollStudentInCourse("12345", 32165, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 32165, 1, 2025, "A")
+                ));
+                dao.enrollStudentInCourse("12345", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 56789, 1, 2025, "B")
+                ));
+                System.out.println("EC 154");
+                dao.enrollStudentInCourse("12345", 93156, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 93156, 1, 2025, "C")
+                ));
+
+                // Billy Clinton (perm=14682): CS160 B, CS130 B :contentReference[oaicite:10]{index=10}
+                System.out.println("Billy Clinton");
+                dao.enrollStudentInCourse("14682", 41725, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 41725, 1, 2025, "B")
+                ));
+                dao.enrollStudentInCourse("14682", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 56789, 1, 2025, "B")
+                ));
+
+                // Cindy Laugher (perm=37642): EC152 C, CS130 B :contentReference[oaicite:11]{index=11}
+                System.out.println("Cindy Laugher");
+                dao.enrollStudentInCourse("37642", 91823, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 91823, 1, 2025, "C")
+                ));
+                dao.enrollStudentInCourse("37642", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 56789, 1, 2025, "B")
+                ));
+
+                // David Copperfill (perm=85821): CS130 C, CS026 A :contentReference[oaicite:12]{index=12}
+                System.out.println("David Copperfill");
+                dao.enrollStudentInCourse("85821", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 56789, 1, 2025, "C")
+                ));
+                dao.enrollStudentInCourse("85821", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 76543, 1, 2025, "A")
+                ));
+
+                // Elizabeth Sailor (perm=38567): EC154 C, CS130 A :contentReference[oaicite:13]{index=13}
+                System.out.println("Elizabeth Sailor");
+                // dao.enrollStudentInCourse("38567", 93156, 1, 2025);
+                // dao.enterGrades(Arrays.asList(
+                //     new GradeEntry("38567", 93156, 1, 2025, "C")
+                // ));
+                dao.enrollStudentInCourse("38567", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 56789, 1, 2025, "A")
+                ));
+
+                // Fatal Castro (perm=81934): CS154 C, CS130 A :contentReference[oaicite:14]{index=14}
+                System.out.println("Fatal Castro");
+                dao.enrollStudentInCourse("81934", 32165, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 32165, 1, 2025, "C")
+                ));
+                dao.enrollStudentInCourse("81934", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 56789, 1, 2025, "A")
+                ));
+
+                // George Brush (perm=98246): EC152 B :contentReference[oaicite:15]{index=15}
+                System.out.println("George Brush");
+                dao.enrollStudentInCourse("98246", 91823, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 91823, 1, 2025, "B")
+                ));
+
+                // Hurryson Ford (perm=35328): (none in 25W) :contentReference[oaicite:16]{index=16}
+
+                // Ivan Lendme (perm=84713): CS026 D :contentReference[oaicite:17]{index=17}
+                System.out.println("Ivan Lendme");
+                dao.enrollStudentInCourse("84713", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("84713", 76543, 1, 2025, "D")
+                ));
+
+                // Kelvin Coster (perm=46590): CS026 A :contentReference[oaicite:18]{index=18}
+                System.out.println("Kelvin Coster");
+                dao.enrollStudentInCourse("46590", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("46590", 76543, 1, 2025, "A")
+                ));
+
+                // Li Kung (perm=91734): CS026 A :contentReference[oaicite:19]{index=19}
+                dao.enrollStudentInCourse("91734", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("91734", 76543, 1, 2025, "A")
+                ));
+
+                // Magic Jordon (perm=73521): CS026 B :contentReference[oaicite:20]{index=20}
+                dao.enrollStudentInCourse("73521", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("73521", 76543, 1, 2025, "B")
+                ));
+
+                // Nam-hoi Chung (perm=53540): CS154 C, CS130 C :contentReference[oaicite:21]{index=21}
+                dao.enrollStudentInCourse("53540", 32165, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("53540", 32165, 1, 2025, "C")
+                ));
+                dao.enrollStudentInCourse("53540", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("53540", 56789, 1, 2025, "C")
+                ));
+
+                // Olive Stoner (perm=82452): EC152 C, CS026 C :contentReference[oaicite:22]{index=22}
+                dao.enrollStudentInCourse("82452", 91823, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("82452", 91823, 1, 2025, "C")
+                ));
+                dao.enrollStudentInCourse("82452", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("82452", 76543, 1, 2025, "C")
+                ));
+
+                // Pit Wilson (perm=18221): CS130 B, CS026 B :contentReference[oaicite:23]{index=23}
+                dao.enrollStudentInCourse("18221", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("18221", 56789, 1, 2025, "B")
+                ));
+                dao.enrollStudentInCourse("18221", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("18221", 76543, 1, 2025, "B")
+                ));
 
                 System.out.println("✅ Sample data (including history) loaded!");
             }
@@ -342,7 +605,10 @@ class UniversityDAO {
      * Get student information by perm number.
      */
     public Student getStudent(String perm) throws SQLException {
-        String sql = "SELECT * FROM Students WHERE perm = ?";
+        String sql = 
+        "SELECT * " +
+        "FROM Students " +
+        "WHERE TRIM(perm) = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, perm);
             try (ResultSet rs = ps.executeQuery()) {
@@ -353,6 +619,7 @@ class UniversityDAO {
             }
         }
     }
+
 
     // ============ COURSE OFFERING MANAGEMENT ============
 
@@ -441,25 +708,58 @@ class UniversityDAO {
 
     // ============ ENROLLMENT MANAGEMENT ============
 
-    /**
-     * Check prerequisites for a course before enrollment.
+        /**
+         * Check prerequisites for a course before enrollment.
+         */
+        /**
+     * Returns true if the student has completed *all* prerequisites
+     * (with grade A–C) for the given course code, across any past term.
      */
     public boolean hasCompletedPrerequisites(String perm, String courseNo) throws SQLException {
-        String sql = "SELECT COUNT(*) as missing FROM Is_Prerequisite p " +
-                     "WHERE p.course_no = ? AND p.prereq_course_no NOT IN (" +
-                     "    SELECT o.course_no FROM Completed_Course c " +
-                     "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-                     "    WHERE c.perm = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')" +
-                     ")";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, courseNo);
-            ps.setString(2, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt("missing") == 0;
+            // 1) Fetch the prereq list *trimmed* from the DB
+            String sqlFetch =
+            "SELECT TRIM(prereq_course_no) AS prereq_code " +
+            "  FROM Is_Prerequisite " +
+            " WHERE TRIM(course_no) = ?";
+            List<String> prereqs = new ArrayList<>();
+            try (PreparedStatement ps = conn.prepareStatement(sqlFetch)) {
+                ps.setString(1, courseNo.trim());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        prereqs.add(rs.getString("prereq_code"));
+                    }
+                }
             }
+            System.out.println("Trimmed prereqs for " + courseNo + " -> " + prereqs);
+
+            // 2) Check each prereq against Completed_Course → Course_Offerings join
+            String sqlCheck =
+                "SELECT 1\n" +
+                "FROM Completed_Course cc\n" +
+                "JOIN Course_Offerings co\n" +
+                "  ON cc.enrollment_code = co.enrollment_code\n" +
+                " AND cc.quarter         = co.quarter\n" +
+                " AND cc.year            = co.year\n" +
+                "WHERE TRIM(cc.perm)      = ?\n" +
+                "  AND TRIM(co.course_no) = ?\n" +
+                "  AND TRIM(cc.grade)    IN ('A+','A','A-','B+','B','B-','C+','C')";
+
+                try (PreparedStatement ps2 = conn.prepareStatement(sqlCheck)) {
+                    for (String prereq : prereqs) {
+                        System.out.println("Checking prereq `" + prereq + "` for student " + perm);
+                        ps2.setString(1, perm.trim());
+                        ps2.setString(2, prereq);  // already trimmed when loaded
+                        try (ResultSet rs2 = ps2.executeQuery()) {
+                            if (!rs2.next()) {
+                                System.err.println("  → FAILED to find " + prereq + " (grade mismatch?)");
+                                return false;
+                            }
+                            System.out.println("  → FOUND " + prereq);
+                        }
+                    }
+                }
+            return true;
         }
-    }
 
     /**
      * Get current enrollment count for a student.
@@ -522,11 +822,17 @@ class UniversityDAO {
             throw new SQLException("Student already enrolled in this course");
         }
 
-        String sql = "INSERT INTO Currently_Enrolled (perm, enrollment_code, dropped) VALUES (?, ?, 'N')";
+        String sql =
+        "INSERT INTO Currently_Enrolled "
+        + "(perm, enrollment_code, quarter, year, dropped) "
+        + "VALUES (?, ?, ?, ?, 'N')";
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, perm);
             ps.setInt(2, enrollCode);
-            return ps.executeUpdate() > 0;
+            ps.setInt(3, quarter);
+            ps.setInt(4, year);
+            return ps.executeUpdate() == 1;
         }
     }
 
@@ -897,7 +1203,7 @@ class UniversityDAO {
         }
     }
 
-    public class GradeEntry {
+    public static class GradeEntry {
         private final String perm;
         private final int enrollmentCode;
         private final int quarter;
@@ -1011,25 +1317,6 @@ class UniversityDAO {
         }
         return offerings;
     }
-
-
-    /**
-     * Get course prerequisites.
-     */
-    public List<String> getCoursePrerequisites(String courseNo) throws SQLException {
-        String sql = "SELECT prereq_course_no FROM Is_Prerequisite WHERE course_no = ?";
-        List<String> prereqs = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, courseNo);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    prereqs.add(rs.getString("prereq_course_no"));
-                }
-            }
-        }
-        return prereqs;
-    }
-
     /**
      * Calculate GPA for a student.
      */
