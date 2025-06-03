@@ -280,7 +280,7 @@ public class TestConnection {
                 // --- Now Winter 2025 completed courses ---
                 System.out.println("-- Loading Winter 2025 completed courses --");
                 // Alfred Hitchcock (perm=12345): CS154 A, CS130 B, EC154 C :contentReference[oaicite:9]{index=9}
-                System.out.println("Alfred Hitchcock");
+                // System.out.println("Alfred Hitchcock");
                 // dao.enrollStudentInCourse("12345", 32165, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("12345", 32165, 1, 2025, "A")
@@ -296,7 +296,7 @@ public class TestConnection {
                 ));
 
                 // Billy Clinton (perm=14682): CS160 B, CS130 B :contentReference[oaicite:10]{index=10}
-                System.out.println("Billy Clinton");
+                // System.out.println("Billy Clinton");
                 // dao.enrollStudentInCourse("14682", 41725, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("14682", 41725, 1, 2025, "B")
@@ -307,7 +307,7 @@ public class TestConnection {
                 ));
 
                 // Cindy Laugher (perm=37642): EC152 C, CS130 B :contentReference[oaicite:11]{index=11}
-                System.out.println("Cindy Laugher");
+                // System.out.println("Cindy Laugher");
                 // dao.enrollStudentInCourse("37642", 91823, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("37642", 91823, 1, 2025, "C")
@@ -318,7 +318,7 @@ public class TestConnection {
                 ));
 
                 // David Copperfill (perm=85821): CS130 C, CS026 A :contentReference[oaicite:12]{index=12}
-                System.out.println("David Copperfill");
+                // System.out.println("David Copperfill");
                 // dao.enrollStudentInCourse("85821", 56789, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("85821", 56789, 1, 2025, "C")
@@ -329,7 +329,7 @@ public class TestConnection {
                 ));
 
                 // Elizabeth Sailor (perm=38567): EC154 C, CS130 A :contentReference[oaicite:13]{index=13}
-                System.out.println("Elizabeth Sailor");
+                // System.out.println("Elizabeth Sailor");
                 // dao.enrollStudentInCourse("38567", 93156, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("38567", 93156, 1, 2025, "C")
@@ -340,7 +340,7 @@ public class TestConnection {
                 ));
 
                 // Fatal Castro (perm=81934): CS154 C, CS130 A :contentReference[oaicite:14]{index=14}
-                System.out.println("Fatal Castro");
+                // System.out.println("Fatal Castro");
                 // dao.enrollStudentInCourse("81934", 32165, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("81934", 32165, 1, 2025, "C")
@@ -351,7 +351,7 @@ public class TestConnection {
                 ));
 
                 // George Brush (perm=98246): EC152 B :contentReference[oaicite:15]{index=15}
-                System.out.println("George Brush");
+                // System.out.println("George Brush");
                 // dao.enrollStudentInCourse("98246", 91823, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("98246", 91823, 1, 2025, "B")
@@ -360,14 +360,14 @@ public class TestConnection {
                 // Hurryson Ford (perm=35328): (none in 25W) :contentReference[oaicite:16]{index=16}
 
                 // Ivan Lendme (perm=84713): CS026 D :contentReference[oaicite:17]{index=17}
-                System.out.println("Ivan Lendme");
+                // System.out.println("Ivan Lendme");
                 // dao.enrollStudentInCourse("84713", 76543, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("84713", 76543, 1, 2025, "D")
                 ));
 
                 // Kelvin Coster (perm=46590): CS026 A :contentReference[oaicite:18]{index=18}
-                System.out.println("Kelvin Coster");
+                // System.out.println("Kelvin Coster");
                 // dao.enrollStudentInCourse("46590", 76543, 1, 2025);
                 dao.enterGrades(Arrays.asList(
                     new GradeEntry("46590", 76543, 1, 2025, "A")
@@ -458,7 +458,7 @@ public class TestConnection {
                 // System.out.println(18221);
                 dao.enrollStudentInCourse("18221", 12345, CURRENT_QUARTER, CURRENT_YEAR);
                 
-                System.out.println("✅ Sample data (including history) loaded!");
+                System.out.println("SUCCESS: Sample data (including history) loaded!");
             }
         } catch (SQLException e) {
             System.err.println("ERROR during test run:");
@@ -593,7 +593,7 @@ class UniversityDAO {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 not available", e);
+            throw new RuntimeException("Unable to hash pin: ", e);
         }
     }
 
@@ -639,13 +639,12 @@ class UniversityDAO {
     public boolean setPin(String perm, String oldRawPin, String newRawPin) throws SQLException {
         // first verify old PIN
         if (!verifyPin(perm, oldRawPin)) {
-            System.out.println("mismatch");
             return false;
         }
 
         String newHash = hashPin(newRawPin);
         String sql = "UPDATE Students SET pin = '" + newHash + "' WHERE perm = '" + perm + "'";
-        System.out.println("SQL: " + sql); // Print the full SQL string
+        // System.out.println("SQL: " + sql); // debugging
 
         try (Statement stmt = conn.createStatement()) {
             return stmt.executeUpdate(sql) == 1;
@@ -912,22 +911,54 @@ class UniversityDAO {
     // ============ GRADE MANAGEMENT ============
 
     /**
-     * Enter grades for a course (batch operation).
+     * Enter grades for a course (individual operation).
      */
     public boolean enterGrades(String perm, int enrollmentCode, int quarter, int year, String grade) throws SQLException {
-        String sql = "INSERT INTO Completed_Course " +
-                 "(perm, enrollment_code, quarter, year, grade) " +
-                 "VALUES ('" + perm + "', " + enrollmentCode + ", " + quarter + ", " + year + ", '" + grade + "')";
+        // String sql = "INSERT INTO Completed_Course " +
+        //          "(perm, enrollment_code, quarter, year, grade) " +
+        //          "VALUES ('" + perm + "', " + enrollmentCode + ", " + quarter + ", " + year + ", '" + grade + "')";
     
-        try (Statement stmt = conn.createStatement()) {
+        // try (Statement stmt = conn.createStatement()) {
+        //     stmt.executeUpdate(sql);
+        //     return true;
+        // } catch (SQLException e) {
+        //     System.err.println("Failed to insert grade for perm " + perm + ": " + e.getMessage());
+        //     return false;
+        // }
+        String checkSql = "SELECT COUNT(*) FROM Completed_Course " +
+                      "WHERE perm = '" + perm + "' AND enrollment_code = " + enrollmentCode +
+                      " AND quarter = " + quarter + " AND year = " + year;
+
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(checkSql)) {
+
+            rs.next();
+            int count = rs.getInt(1);
+
+            String sql;
+            if (count > 0) {
+                // Record exists -> Update
+                sql = "UPDATE Completed_Course SET grade = '" + grade + "' " +
+                    "WHERE perm = '" + perm + "' AND enrollment_code = " + enrollmentCode +
+                    " AND quarter = " + quarter + " AND year = " + year;
+            } else {
+                // Record doesn't exist -> Insert
+                sql = "INSERT INTO Completed_Course (perm, enrollment_code, quarter, year, grade) " +
+                    "VALUES ('" + perm + "', " + enrollmentCode + ", " + quarter + ", " + year + ", '" + grade + "')";
+            }
+
             stmt.executeUpdate(sql);
             return true;
+
         } catch (SQLException e) {
-            System.err.println("❌ Failed to insert grade for perm " + perm + ": " + e.getMessage());
+            System.err.println("Failed to insert/update grade for perm " + perm + ": " + e.getMessage());
             return false;
         }
     }
 
+    /**
+     * Enter grades for a course (batch operation).
+     */
     public void enterGrades(List<GradeEntry> gradeEntries) throws SQLException {
         String sql =
             "INSERT INTO Completed_Course " +
@@ -1507,6 +1538,6 @@ class UniversityDAO {
             stmt.executeUpdate("DELETE FROM Terms");
             stmt.executeUpdate("DELETE FROM Department");
         }
-        System.out.println("🗑️  All tables cleared.");
+        System.out.println("SUCCESS: All tables cleared.");
     }
 }
