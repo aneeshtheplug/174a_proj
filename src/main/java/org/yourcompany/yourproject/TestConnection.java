@@ -623,20 +623,6 @@ class UniversityDAO {
 
     /** Verify that the provided rawPin (5 digits) matches the stored hash */
     public boolean verifyPin(String perm, String rawPin) throws SQLException {
-        // String sql = "SELECT pin FROM Students WHERE perm = ?";
-        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        //     ps.setString(1, perm);
-        //     try (ResultSet rs = ps.executeQuery()) {
-        //         if (!rs.next()) return false;               // no such student
-        //         String storedHash = rs.getString("pin");
-        //         String candidateHash = hashPin(rawPin);
-        //         System.out.println("Stored: " + storedHash);
-        //         System.out.println("Input : " + candidateHash);
-
-        //         return storedHash.equals(candidateHash);
-        //     }
-        // }
-
         String sql = "SELECT pin FROM Students WHERE perm = '" + perm + "'";
         try (Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
@@ -645,30 +631,12 @@ class UniversityDAO {
 
             String storedHash = rs.getString("pin");
             String candidateHash = hashPin(rawPin);
-
-            System.out.println("Stored (len=" + storedHash.length() + "): " + storedHash);
-            System.out.println("Input  (len=" + candidateHash.length() + "): " + candidateHash);
-            System.out.println("Equal: " + storedHash.trim().equals(candidateHash.trim()));
             return storedHash.trim().equals(candidateHash.trim());
         }
     }
 
     /** Change student PIN: only store the hash of the new PIN */
     public boolean setPin(String perm, String oldRawPin, String newRawPin) throws SQLException {
-        // // first verify old PIN
-        // if (!verifyPin(perm, oldRawPin)) {
-        //     System.out.println("mismatch");
-        //     return false;
-        // }
-        // String newHash = hashPin(newRawPin);
-        // String sql = "UPDATE Students SET pin = ? WHERE perm = ?";
-        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        //     ps.setString(1, newHash);
-        //     ps.setString(2, perm);
-        //     return ps.executeUpdate() == 1;
-        // }
-
-
         // first verify old PIN
         if (!verifyPin(perm, oldRawPin)) {
             System.out.println("mismatch");
@@ -1072,17 +1040,34 @@ class UniversityDAO {
     /**
      * List students enrolled in a course.
      */
-    public List<Student> listStudentsInCourse(int enrollCode) throws SQLException {
-        String sql = "SELECT s.* FROM Students s " +
-                     "JOIN Currently_Enrolled e ON s.perm = e.perm " +
-                     "WHERE e.enrollment_code = ? AND e.dropped = 'N'";
+    public List<Student> listStudentsInCourse(int enrollCode, int quarter, int year) throws SQLException {
+        // String sql = "SELECT s.* FROM Students s " +
+        //              "JOIN Currently_Enrolled e ON s.perm = e.perm " +
+        //              "WHERE e.enrollment_code = ? AND e.dropped = 'N' AND e.quarter = " + quarter + " AND e.year = " + year;
+        // List<Student> list = new ArrayList<>();
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setInt(1, enrollCode);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         while (rs.next()) {
+        //             list.add(new Student(rs));
+        //         }
+        //     }
+        // }
+        // return list;
+
+        String sql = "SELECT s.* " +
+                 "FROM Students s " +
+                 "JOIN Currently_Enrolled e ON s.perm = e.perm " +
+                 "WHERE e.enrollment_code = " + enrollCode +
+                 " AND e.dropped = 'N'" +
+                 " AND e.quarter = " + quarter +
+                 " AND e.year = " + year;
+
         List<Student> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, enrollCode);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new Student(rs));
-                }
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(new Student(rs));
             }
         }
         return list;
@@ -1093,6 +1078,20 @@ class UniversityDAO {
     /**
      * Enter grades for a course (batch operation).
      */
+    public boolean enterGrades(String perm, int enrollmentCode, int quarter, int year, String grade) throws SQLException {
+        String sql = "INSERT INTO Completed_Course " +
+                 "(perm, enrollment_code, quarter, year, grade) " +
+                 "VALUES ('" + perm + "', " + enrollmentCode + ", " + quarter + ", " + year + ", '" + grade + "')";
+    
+        try (Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+            return true;
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to insert grade for perm " + perm + ": " + e.getMessage());
+            return false;
+        }
+    }
+
     public void enterGrades(List<GradeEntry> gradeEntries) throws SQLException {
         String sql =
             "INSERT INTO Completed_Course " +
@@ -1149,11 +1148,18 @@ class UniversityDAO {
 
         String sql = "SELECT c.*, o.course_no, o.quarter, o.year, co.title " +
              "FROM Completed_Course c " +
-             "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-             "    AND o.quarter = " + prevQuarter + " AND o.year = " + prevYear + " " +
+             "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code AND c.year = o.year AND c.quarter = o.quarter " +
              "JOIN Courses co ON o.course_no = co.course_no " +
              "WHERE c.perm = '" + perm + "' " +
-             "AND c.quarter = " + prevQuarter + " AND c.year = " + prevYear;
+             "ORDER BY o.year ASC, o.quarter ASC";
+
+        // String sql = "SELECT c.*, o.course_no, o.quarter, o.year, co.title " +
+        //      "FROM Completed_Course c " +
+        //      "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+        //      "    AND o.quarter = " + prevQuarter + " AND o.year = " + prevYear + " " +
+        //      "JOIN Courses co ON o.course_no = co.course_no " +
+        //      "WHERE c.perm = '" + perm + "' " +
+        //      "AND c.quarter = " + prevQuarter + " AND c.year = " + prevYear;
 
         List<CompletedCourse> grades = new ArrayList<>();
         try (Statement stmt = conn.createStatement();
@@ -1194,57 +1200,109 @@ class UniversityDAO {
      * Check if student meets graduation requirements for their major.
      */
     public RequirementsCheck checkRequirements(String perm) throws SQLException {
+        // Student student = getStudent(perm);
+        // if (student == null) {
+        //     throw new SQLException("Student not found");
+        // }
+
+        // // Get major requirements
+        // String majorSql = "SELECT number_electives FROM Major WHERE mname = ?";
+        // int requiredElectives = 0;
+        // try (PreparedStatement ps = conn.prepareStatement(majorSql)) {
+        //     ps.setString(1, student.mname);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         if (rs.next()) {
+        //             requiredElectives = rs.getInt("number_electives");
+        //         }
+        //     }
+        // }
+
+        // // Get completed mandatory courses
+        // String mandatorySql = "SELECT m.course_no FROM Mandatory_Major_Courses m " +
+        //                      "WHERE m.mname = ? AND m.course_no NOT IN (" +
+        //                      "    SELECT o.course_no FROM Completed_Course c " +
+        //                      "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+        //                      "    WHERE c.perm = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')" +
+        //                      ")";
+        
+        // List<String> missingMandatory = new ArrayList<>();
+        // try (PreparedStatement ps = conn.prepareStatement(mandatorySql)) {
+        //     ps.setString(1, student.mname);
+        //     ps.setString(2, perm);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         while (rs.next()) {
+        //             missingMandatory.add(rs.getString("course_no"));
+        //         }
+        //     }
+        // }
+
+        // // Count completed electives
+        // String electivesSql = "SELECT COUNT(DISTINCT o.course_no) as completed_electives " +
+        //                      "FROM Completed_Course c " +
+        //                      "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+        //                      "JOIN Major_Electives e ON o.course_no = e.course_no " +
+        //                      "WHERE c.perm = ? AND e.mname = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')";
+        
+        // int completedElectives = 0;
+        // try (PreparedStatement ps = conn.prepareStatement(electivesSql)) {
+        //     ps.setString(1, perm);
+        //     ps.setString(2, student.mname);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         if (rs.next()) {
+        //             completedElectives = rs.getInt("completed_electives");
+        //         }
+        //     }
+        // }
+
+        // int missingElectives = Math.max(0, requiredElectives - completedElectives);
+        // boolean canGraduate = missingMandatory.isEmpty() && missingElectives == 0;
+
+        // return new RequirementsCheck(canGraduate, missingMandatory, missingElectives);
+
         Student student = getStudent(perm);
         if (student == null) {
             throw new SQLException("Student not found");
         }
 
-        // Get major requirements
-        String majorSql = "SELECT number_electives FROM Major WHERE mname = ?";
+        // Get major requirements (no prepared statement)
+        String majorSql = "SELECT number_electives FROM Major WHERE mname = '" + student.mname + "'";
         int requiredElectives = 0;
-        try (PreparedStatement ps = conn.prepareStatement(majorSql)) {
-            ps.setString(1, student.mname);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    requiredElectives = rs.getInt("number_electives");
-                }
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(majorSql)) {
+            if (rs.next()) {
+                requiredElectives = rs.getInt("number_electives");
             }
         }
 
-        // Get completed mandatory courses
+        // Get completed mandatory courses (no prepared statement)
         String mandatorySql = "SELECT m.course_no FROM Mandatory_Major_Courses m " +
-                             "WHERE m.mname = ? AND m.course_no NOT IN (" +
-                             "    SELECT o.course_no FROM Completed_Course c " +
-                             "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-                             "    WHERE c.perm = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')" +
-                             ")";
+                            "WHERE m.mname = '" + student.mname + "' AND m.course_no NOT IN (" +
+                            "    SELECT o.course_no FROM Completed_Course c " +
+                            "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+                            "    WHERE c.perm = '" + perm + "' AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')" +
+                            ")";
         
         List<String> missingMandatory = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(mandatorySql)) {
-            ps.setString(1, student.mname);
-            ps.setString(2, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    missingMandatory.add(rs.getString("course_no"));
-                }
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(mandatorySql)) {
+            while (rs.next()) {
+                missingMandatory.add(rs.getString("course_no"));
             }
         }
 
-        // Count completed electives
+        // Count completed electives (no prepared statement)
         String electivesSql = "SELECT COUNT(DISTINCT o.course_no) as completed_electives " +
-                             "FROM Completed_Course c " +
-                             "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-                             "JOIN Major_Electives e ON o.course_no = e.course_no " +
-                             "WHERE c.perm = ? AND e.mname = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')";
+                            "FROM Completed_Course c " +
+                            "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+                            "JOIN Major_Electives e ON o.course_no = e.course_no " +
+                            "WHERE c.perm = '" + perm + "' AND e.mname = '" + student.mname + "' " +
+                            "AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')";
         
         int completedElectives = 0;
-        try (PreparedStatement ps = conn.prepareStatement(electivesSql)) {
-            ps.setString(1, perm);
-            ps.setString(2, student.mname);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    completedElectives = rs.getInt("completed_electives");
-                }
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(electivesSql)) {
+            if (rs.next()) {
+                completedElectives = rs.getInt("completed_electives");
             }
         }
 
@@ -1259,24 +1317,34 @@ class UniversityDAO {
     /**
      * Generate grade mailer data for all students.
      */
-    public List<GradeMailer> generateGradeMailer(int quarter, int year) throws SQLException {
-        String sql = "SELECT s.perm, s.sname_first, s.sname_last, s.address, " +
-                     "c.grade, o.course_no, co.title " +
-                     "FROM Students s " +
-                     "JOIN Completed_Course c ON s.perm = c.perm " +
-                     "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-                     "JOIN Courses co ON o.course_no = co.course_no " +
-                     "WHERE o.quarter = ? AND o.year = ? " +
-                     "ORDER BY s.perm, o.course_no";
-        
+    public List<GradeMailer> generateGradeMailer(int quarter, int year, int current_quarter, int current_year) throws SQLException {
+        String sql;
+        if (quarter == current_quarter && year == current_year) {
+            sql = "SELECT s.perm, s.sname_first, s.sname_last, s.address, " +
+                "'In Progress' AS grade, " +
+                "o.course_no, co.title " +
+                "FROM Students s " +
+                "LEFT JOIN Currently_Enrolled e ON s.perm = e.perm " +
+                "LEFT JOIN Course_Offerings o ON e.enrollment_code = o.enrollment_code AND e.year = o.year AND e.quarter = o.quarter " +
+                "LEFT JOIN Courses co ON o.course_no = co.course_no " +
+                "WHERE (o.quarter = " + quarter + " AND o.year = " + year + ") OR o.quarter IS NULL OR o.year IS NULL " +
+                "ORDER BY s.perm, o.course_no";
+        } else {
+            sql = "SELECT s.perm, s.sname_first, s.sname_last, s.address, " +
+                "c.grade, o.course_no, co.title " +
+                "FROM Students s " +
+                "LEFT JOIN Completed_Course c ON s.perm = c.perm " +
+                "LEFT JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code AND c.year = o.year AND c.quarter = o.quarter " +
+                "LEFT JOIN Courses co ON o.course_no = co.course_no " +
+                "WHERE (o.quarter = " + quarter + " AND o.year = " + year + ") OR o.quarter IS NULL OR o.year IS NULL " +
+                "ORDER BY s.perm, o.course_no";
+        }
+
         List<GradeMailer> mailers = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, quarter);
-            ps.setInt(2, year);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    mailers.add(new GradeMailer(rs));
-                }
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                mailers.add(new GradeMailer(rs));
             }
         }
         return mailers;
