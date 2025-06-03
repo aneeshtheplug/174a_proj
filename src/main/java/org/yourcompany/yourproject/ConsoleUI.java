@@ -18,7 +18,7 @@ public class ConsoleUI {
 
             UniversityDAO dao = ui.get_connection();
             // TestConnection db = new TestConnection();
-            System.out.println("✅ Connected to the database!");
+            System.out.println("Connected to the database!");
 
             while (true) {
                 System.out.println("\n\n===== IVC Console Menu =====");
@@ -109,7 +109,7 @@ public class ConsoleUI {
         }
 
         while (true) {
-            System.out.println("\n===== ⚜️  GOLD Menu⚜️ =====");
+            System.out.println("\n===== GOLD Menu =====");
             System.out.println("1. Add a course");
             System.out.println("2. Drop a course");
             System.out.println("3. List currently enrolled courses");
@@ -135,19 +135,19 @@ public class ConsoleUI {
 
                         try {
                             if (!dao.verifyPin(String.valueOf(perm), pinInput)) {
-                                System.out.println("❌ Incorrect PIN. Enrollment aborted.");
+                                System.out.println("Incorrect PIN. Enrollment aborted.");
                                 break;
                             }
 
-                            System.out.println("📚 Adding course with code " + code + "...");
+                            System.out.println("Adding course with code " + code + "...");
                             boolean success = dao.enrollStudentInCourse(String.valueOf(perm), code, CURRENT_QUARTER, CURRENT_YEAR);
                             if (success) {
-                                System.out.println("✅ Successfully enrolled in course " + code + "!");
+                                System.out.println("Successfully enrolled in course " + code + "!");
                             } else {
-                                System.out.println("❌ Failed to enroll.");
+                                System.out.println("Failed to enroll.");
                             }
                         } catch (SQLException e) {
-                            System.out.println("❌ Enrollment failed: " + e.getMessage());
+                            System.out.println("Enrollment failed: " + e.getMessage());
                         }
                     } else {
                         System.out.println("Invalid enrollment code. Must be 5 digits.");
@@ -163,23 +163,23 @@ public class ConsoleUI {
                             try {
                                 // Verify the PIN before dropping
                                 if (!dao.verifyPin(String.valueOf(perm), pinInput)) {
-                                    System.out.println("❌ PIN verification failed. Cannot drop course.");
+                                    System.out.println("PIN verification failed. Cannot drop course.");
                                     break;
                                 }
 
                                 int code = Integer.parseInt(dropInput);
-                                System.out.println("🗑️ Dropping course with code " + code + "...");
+                                System.out.println("Dropping course with code " + code + "...");
                                 boolean success = dao.dropStudentFromCourse(String.valueOf(perm), code, CURRENT_QUARTER, CURRENT_YEAR);
                                 if (success) {
-                                    System.out.println("✅ Successfully dropped course " + code + "!");
+                                    System.out.println("Successfully dropped course " + code + "!");
                                 } else {
-                                    System.out.println("❌ Drop failed.");
+                                    System.out.println("Drop failed.");
                                 }
                             } catch (SQLException e) {
-                                System.out.println("❌ Drop failed: " + e.getMessage());
+                                System.out.println("Drop failed: " + e.getMessage());
                             }
                         } else {
-                            System.out.println("❌ Invalid enrollment code. Must be 5 digits.");
+                            System.out.println("Invalid enrollment code. Must be 5 digits.");
                         }
                     break;
             
@@ -210,7 +210,7 @@ public class ConsoleUI {
                             }
                         }
                     } catch (SQLException e) {
-                        System.out.println("❌ Failed to list current courses: " + e.getMessage());
+                        System.out.println("Failed to list current courses: " + e.getMessage());
                     }
                     break;
                 
@@ -237,13 +237,13 @@ public class ConsoleUI {
                             }
                         }
                     } catch (SQLException e) {
-                        System.out.println("❌ Failed to retrieve previous quarter grades: " + e.getMessage());
+                        System.out.println("Failed to retrieve previous quarters' grades: " + e.getMessage());
                     }
                     break;
                 
             
                     case "5":
-                    System.out.println("📋 Checking graduation requirements...");
+                    System.out.println("Checking graduation requirements...");
                     try {
                         UniversityDAO.RequirementsCheck result = dao.checkRequirements(String.valueOf(perm));
                         
@@ -268,7 +268,7 @@ public class ConsoleUI {
                             }
                         }
                     } catch (SQLException e) {
-                        System.out.println("❌ Failed to check requirements: " + e.getMessage());
+                        System.out.println("Failed to check requirements: " + e.getMessage());
                     }
                     break;
                 
@@ -288,7 +288,7 @@ public class ConsoleUI {
                             }
                         }
                     } catch (SQLException e) {
-                        System.out.println("❌ Failed to generate study plan: " + e.getMessage());
+                        System.out.println("Failed to generate study plan: " + e.getMessage());
                     }
                     break;
             
@@ -310,11 +310,11 @@ public class ConsoleUI {
                                     System.out.println("Incorrect current PIN. Try again.");
                                 }
                             } catch (SQLException e) {
-                                System.out.println("❌ Failed to change PIN: " + e.getMessage());
+                                System.out.println("Failed to change PIN: " + e.getMessage());
                             }
                         }
                     } else {
-                        System.out.println("❌ PINs must be 5-digit integers.");
+                        System.out.println("PINs must be 5-digit integers.");
                     }
                     break;
                 
@@ -336,10 +336,10 @@ public class ConsoleUI {
         int CURRENT_QUARTER = 2;
         int CURRENT_YEAR = 2025;
 
-        System.out.println("📋 Logged in as Registrar Staff.\n");
+        System.out.println("Logged in as Registrar Staff.\n");
 
         while (true) {
-            System.out.println("\n===== 🏛️  Registrar Menu 🏛️ =====");
+            System.out.println("\n===== Registrar Menu =====");
             System.out.println("1. Add student to course");
             System.out.println("2. Drop student from course");
             System.out.println("3. List courses taken by a student");
@@ -363,12 +363,12 @@ public class ConsoleUI {
                         if (permAdd.matches("\\d{5}") && enrollCodeAdd.matches("\\d{5}")) {
                             boolean success = dao.enrollStudentInCourse(permAdd, Integer.parseInt(enrollCodeAdd), CURRENT_QUARTER, CURRENT_YEAR);
                             if (success) {
-                                System.out.println("✅ Student enrolled successfully.");
+                                System.out.println("Student enrolled successfully!");
                             } else {
-                                System.out.println("❌ Enrollment failed.");
+                                System.out.println("Enrollment failed.");
                             }
                         } else {
-                            System.out.println("❌ Invalid PERM or enrollment code.");
+                            System.out.println("Invalid PERM or enrollment code.");
                         }
                         break;
 
@@ -381,12 +381,12 @@ public class ConsoleUI {
                         if (permDrop.matches("\\d{5}") && enrollCodeDrop.matches("\\d{5}")) {
                             boolean success = dao.dropStudentFromCourse(permDrop, Integer.parseInt(enrollCodeDrop), CURRENT_QUARTER, CURRENT_YEAR);
                             if (success) {
-                                System.out.println("✅ Student dropped successfully.");
+                                System.out.println("Student dropped successfully!");
                             } else {
-                                System.out.println("❌ Drop failed.");
+                                System.out.println("Drop failed.");
                             }
                         } else {
-                            System.out.println("❌ Invalid PERM or enrollment code.");
+                            System.out.println("Invalid PERM or enrollment code.");
                         }
                         break;
 
@@ -419,7 +419,7 @@ public class ConsoleUI {
                                 }
                             }
                         } catch (SQLException e) {
-                            System.out.println("❌ Failed to list current courses: " + e.getMessage());
+                            System.out.println("Failed to list current courses: " + e.getMessage());
                         }
                         break;
 
@@ -447,7 +447,7 @@ public class ConsoleUI {
                                 }
                             }
                         } catch (SQLException e) {
-                            System.out.println("❌ Failed to retrieve previous quarter grades: " + e.getMessage());
+                            System.out.println("Failed to retrieve previous quarter grades: " + e.getMessage());
                         }
                         break;
 
@@ -471,19 +471,19 @@ public class ConsoleUI {
                         break;
 
                     case "6":
-                        System.out.print("Enter filename with grades (e.g., grades.txt): ");
+                        System.out.print("Enter filename with grades (e.g. grades.txt): ");
                         String filename = scanner.nextLine().trim();
                     
                         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
                             String header = br.readLine();
                             if (header == null) {
-                                System.out.println("❌ File is empty.");
+                                System.out.println("File is empty.");
                                 break;
                             }
                     
                             String[] meta = header.split(",");
                             if (meta.length != 3) {
-                                System.out.println("❌ Header must include: enrollment_code, quarter, year");
+                                System.out.println("Header must include: enrollment_code, quarter, year");
                                 break;
                             }
                     
@@ -495,10 +495,6 @@ public class ConsoleUI {
                             int successCount = 0;
                             while ((line = br.readLine()) != null) {
                                 String[] parts = line.split(",");
-                                if (parts.length != 2) {
-                                    System.out.println("⚠️ Skipping malformed line: " + line);
-                                    continue;
-                                }
                                 String perm = parts[0].trim();
                                 String grade = parts[1].trim();
                     
@@ -506,13 +502,13 @@ public class ConsoleUI {
                                     boolean succ = dao.enterGrades(perm, enrollmentCode, quarter, year, grade);
                                     successCount += succ ? 1 : 0;
                                 } catch (SQLException e) {
-                                    System.out.println("⚠️ Failed to upload grade for " + perm + ": " + e.getMessage());
+                                    System.out.println("Failed to upload grade for " + perm + ": " + e.getMessage());
                                 }
                             }
                     
-                            System.out.println("✅ Grades uploaded successfully for " + successCount + " students.");
+                            System.out.println("Grades uploaded successfully for " + successCount + " students!");
                         } catch (IOException | NumberFormatException e) {
-                            System.out.println("❌ Grade upload failed: " + e.getMessage());
+                            System.out.println("Grade upload failed: " + e.getMessage());
                         }
                         break;
 
@@ -574,7 +570,7 @@ public class ConsoleUI {
                             }
                     
                         } catch (SQLException e) {
-                            System.out.println("❌ Failed to retrieve transcript: " + e.getMessage());
+                            System.out.println("Failed to retrieve transcript: " + e.getMessage());
                         }
                     
                         break;
@@ -598,7 +594,7 @@ public class ConsoleUI {
                                     if (!gm.perm.equals(lastPerm)) {
                                         // New student
                                         if (!lastPerm.equals("")) {
-                                            System.out.println(); // line break between students
+                                            System.out.println();
                                         }
                                         System.out.println("---------------------------------------------------------------");
                                         System.out.printf("Student: %s %s %nPERM: %s%n", gm.firstName, gm.lastName, gm.perm);
@@ -614,15 +610,14 @@ public class ConsoleUI {
                                                 gm.courseNo, gm.title, gm.grade != null ? gm.grade : "N/A");
                                     } else {
                                         System.out.println("  (No courses enrolled in this term)");
-                                        // Do not print this line repeatedly if multiple nulls (optional logic)
                                     }
                                 }
                                 System.out.println("--------------------------------------------------------");
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("❌ Invalid input. Please enter numeric values for quarter and year.");
+                            System.out.println("Invalid input. Please enter numeric values for quarter and year.");
                         } catch (SQLException e) {
-                            System.out.println("❌ Failed to generate grade mailers: " + e.getMessage());
+                            System.out.println("Failed to generate grade mailers: " + e.getMessage());
                         }
                         break;
 
@@ -634,7 +629,7 @@ public class ConsoleUI {
                         System.out.println("Invalid option. Please try again.");
                 }
             } catch (SQLException e) {
-                System.out.println("❌ Database error: " + e.getMessage());
+                System.out.println("Database error: " + e.getMessage());
             }
         }
     }
