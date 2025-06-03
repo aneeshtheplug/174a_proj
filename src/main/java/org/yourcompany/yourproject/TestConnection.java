@@ -844,17 +844,33 @@ class UniversityDAO {
      * Drop a student from a course with validation.
      */
     public boolean dropStudentFromCourse(String perm, int enrollmentCode, int quarter, int year) throws SQLException {
-        String sql =
-        "UPDATE Currently_Enrolled " +
-        "SET dropped = 'Y' " +
-        "WHERE perm = '" + perm + "' " +
-        "  AND enrollment_code = " + enrollmentCode + " " +
-        "  AND quarter = " + quarter + " " +
-        "  AND year = " + year + " " +
-        "  AND dropped = 'N'";
+        // check number of currently enrolled courses other than to-be-dropped course
+        String countSql = 
+        "SELECT COUNT(*) FROM Currently_Enrolled " +
+        "WHERE perm = '" + perm + "' AND dropped = 'N' " +
+        "AND NOT (enrollment_code = " + enrollmentCode + 
+        " AND quarter = " + quarter + 
+        " AND year = " + year + ")";
 
-        try (Statement stmt = conn.createStatement()) {
-            return stmt.executeUpdate(sql) == 1;
+        try (Statement countStmt = conn.createStatement();
+            ResultSet rs = countStmt.executeQuery(countSql)) {
+            if (rs.next() && rs.getInt(1) == 0) {
+                throw new SQLException("Cannot drop the only enrolled course.");
+            }
+        }
+
+        // drop the course if have at least 1 other course
+        String dropSql = 
+            "UPDATE Currently_Enrolled " +
+            "SET dropped = 'Y' " +
+            "WHERE perm = '" + perm + "' " +
+            "AND enrollment_code = " + enrollmentCode + " " +
+            "AND quarter = " + quarter + " " +
+            "AND year = " + year + " " +
+            "AND dropped = 'N'";
+
+        try (Statement dropStmt = conn.createStatement()) {
+            return dropStmt.executeUpdate(dropSql) == 1;
         }
     }
 
@@ -914,17 +930,6 @@ class UniversityDAO {
      * Enter grades for a course (individual operation).
      */
     public boolean enterGrades(String perm, int enrollmentCode, int quarter, int year, String grade) throws SQLException {
-        // String sql = "INSERT INTO Completed_Course " +
-        //          "(perm, enrollment_code, quarter, year, grade) " +
-        //          "VALUES ('" + perm + "', " + enrollmentCode + ", " + quarter + ", " + year + ", '" + grade + "')";
-    
-        // try (Statement stmt = conn.createStatement()) {
-        //     stmt.executeUpdate(sql);
-        //     return true;
-        // } catch (SQLException e) {
-        //     System.err.println("Failed to insert grade for perm " + perm + ": " + e.getMessage());
-        //     return false;
-        // }
         String checkSql = "SELECT COUNT(*) FROM Completed_Course " +
                       "WHERE perm = '" + perm + "' AND enrollment_code = " + enrollmentCode +
                       " AND quarter = " + quarter + " AND year = " + year;
@@ -937,12 +942,12 @@ class UniversityDAO {
 
             String sql;
             if (count > 0) {
-                // Record exists -> Update
+                // grade already exists -> update/override
                 sql = "UPDATE Completed_Course SET grade = '" + grade + "' " +
                     "WHERE perm = '" + perm + "' AND enrollment_code = " + enrollmentCode +
                     " AND quarter = " + quarter + " AND year = " + year;
             } else {
-                // Record doesn't exist -> Insert
+                // grade doesn't already exist -> insert
                 sql = "INSERT INTO Completed_Course (perm, enrollment_code, quarter, year, grade) " +
                     "VALUES ('" + perm + "', " + enrollmentCode + ", " + quarter + ", " + year + ", '" + grade + "')";
             }

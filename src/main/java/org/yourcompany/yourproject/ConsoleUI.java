@@ -4,9 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.pool.OracleDataSource;
@@ -273,18 +279,78 @@ public class ConsoleUI {
                     break;
                 
             
-                case "6":
+                    case "6":
                     System.out.println("Making a graduation plan:");
                     try {
                         UniversityDAO.StudyPlan plan = dao.generateStudyPlan(String.valueOf(perm));
-                
+
                         if (plan.canGraduate) {
                             System.out.println(plan.message);
                         } else {
                             System.out.println(plan.message);
-                            System.out.println("Recommended courses to take:");
-                            for (String course : plan.plannedCourses) {
-                                System.out.println("  - " + course);
+
+                            // Hardcoded course offerings (quarter-based)
+                            Map<String, List<String>> offerings = Map.ofEntries(
+                                Map.entry("CS170", List.of("Fall", "Winter", "Spring")),
+                                Map.entry("CS160", List.of("Fall", "Winter", "Spring")),
+                                Map.entry("CS026", List.of("Fall", "Winter", "Spring")),
+                                Map.entry("EC154", List.of("Fall", "Winter", "Spring")),
+                                Map.entry("EC140", List.of("Spring")),
+                                Map.entry("EC015", List.of("Fall", "Spring")),
+                                Map.entry("CS154", List.of("Fall", "Winter")),
+                                Map.entry("CS130", List.of("Fall", "Winter")),
+                                Map.entry("EC152", List.of("Fall", "Winter")),
+                                Map.entry("CS010", List.of("Fall")),
+                                Map.entry("EC010", List.of("Fall")),
+                                Map.entry("CS174", List.of("Spring"))
+                            );
+
+                            String[] quarters = {"Fall", "Winter", "Spring"};
+                            int startYear = 2025;
+                            int startQuarterIndex = 0; // Fall is the starting quarter
+                            int yearsUntilGraduation = 3;
+
+                            Map<String, String> courseSchedule = new LinkedHashMap<>();
+                            Set<String> scheduled = new HashSet<>();
+
+                            List<String> sortedCourses = new ArrayList<>(plan.plannedCourses);
+                            sortedCourses.sort(Comparator.comparingInt(course ->
+                                offerings.getOrDefault(course.trim(), List.of()).size()
+                            ));
+
+                            int totalQuarters = yearsUntilGraduation * 3;
+
+                            for (int i = 0; i < totalQuarters; i++) {
+                                int quarterIndex = (startQuarterIndex + i) % 3;
+                                int yearOffset = (i+2) / 3;
+                                String quarter = quarters[quarterIndex];
+                                int year = startYear + yearOffset;
+
+                                int coursesScheduledThisQuarter = 0;
+
+                                for (String courseRaw : sortedCourses) {
+                                    if (coursesScheduledThisQuarter >= 3) break; // max 3 courses per quarter
+                                    String course = courseRaw.trim();
+                                    if (!scheduled.contains(course)) {
+                                        List<String> available = offerings.getOrDefault(course, List.of());
+                                        if (available.contains(quarter)) {
+                                            courseSchedule.put(course, quarter + " " + year);
+                                            scheduled.add(course);
+                                            coursesScheduledThisQuarter++;
+                                        }
+                                    }
+                                }
+
+                                if (scheduled.size() == plan.plannedCourses.size()) break;
+                            }
+
+                            System.out.println("Recommended schedule:");
+                            if (courseSchedule.isEmpty()) {
+                                System.out.println(" - No courses could be scheduled. Check offerings or plan.");
+                            } else {
+                                for (Map.Entry<String, String> entry : courseSchedule.entrySet()) {
+                                    System.out.printf("  - %s in %s%n", entry.getKey(), entry.getValue());
+                                }
                             }
                         }
                     } catch (SQLException e) {
