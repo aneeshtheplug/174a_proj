@@ -20,7 +20,7 @@ public class ConsoleUI {
             while (true) {
                 System.out.println("\n\n===== IVC Console Menu =====");
                 System.out.println("1. GOLD (for students)");
-                System.out.println("2. Registrat (for staff)");
+                System.out.println("2. Registrar (for staff)");
                 System.out.println("0. Exit");
                 System.out.print("Select an option: ");
 
@@ -80,22 +80,25 @@ public class ConsoleUI {
     public void gold_ui(UniversityDAO dao){
         Scanner scanner = new Scanner(System.in);
         // TestConnection db = new TestConnection();
+        int CURRENT_QUARTER = 2;
+        int CURRENT_YEAR = 2025;
 
         int perm = -1;
         while (true) {
             System.out.print("Enter your 5-digit PERM number: ");
             String input = scanner.nextLine().trim();
-
+        
             if (input.matches("\\d{5}")) {
                 perm = Integer.parseInt(input);
-
-                // if (db.valid_perm(perm)) {          // need to add a func to check       // CHANGE THISHSIHISSISISISISISISII
-                if (perm > 9999) {          // need to add a func to check
-
-                    System.out.println("Logged in with PERM: " + perm + "\n");
-                    break;
-                } else {
-                    System.out.println("PERM not found in the database.\n");
+                try {
+                    if (dao.getStudent(String.valueOf(perm)) != null) {
+                        System.out.println("Logged in with PERM: " + perm + "\n");
+                        break;
+                    } else {
+                        System.out.println("PERM not found in the database.\n");
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Database error while validating PERM: " + e.getMessage());
                 }
             } else {
                 System.out.println("Invalid PERM format. Please enter exactly 5 digits.\n");
@@ -103,7 +106,7 @@ public class ConsoleUI {
         }
 
         while (true) {
-            System.out.println("\n===== ⚜️ GOLD Menu ⚜️ =====");
+            System.out.println("\n===== ⚜️  GOLD Menu⚜️ =====");
             System.out.println("1. Add a course");
             System.out.println("2. Drop a course");
             System.out.println("3. List enrolled courses (this quarter)");
@@ -120,11 +123,12 @@ public class ConsoleUI {
                 case "1":
                     System.out.print("To add a course, enter the 5-digit enrollment code: ");
                     String addInput = scanner.nextLine().trim();
+                    
                     if (addInput.matches("\\d{5}")) {
                         int code = Integer.parseInt(addInput);
                         System.out.println("📚 Adding course with code " + code + "...");
                         try {
-                            boolean success = dao.enrollStudentInCourse(String.valueOf(perm), code);
+                            boolean success = dao.enrollStudentInCourse(String.valueOf(perm), code, CURRENT_QUARTER, CURRENT_YEAR);
                             if (success) {
                                 System.out.println("✅ Successfully enrolled in course " + code + "!");
                             } else {
@@ -145,7 +149,7 @@ public class ConsoleUI {
                         int code = Integer.parseInt(dropInput);
                         System.out.println("🗑️ Dropping course with code " + code + "...");
                         try {
-                            boolean success = dao.dropStudentFromCourse(String.valueOf(perm), code);
+                            boolean success = dao.dropStudentFromCourse(String.valueOf(perm), code, CURRENT_QUARTER, CURRENT_YEAR);
                             if (success) {
                                 System.out.println("✅ Successfully dropped course " + code + "!");
                             } else {
@@ -162,7 +166,7 @@ public class ConsoleUI {
                     case "3":
                     System.out.println("Listing current quarter courses...");
                     try {
-                        List<UniversityDAO.CourseOffering> result = dao.listCurrentCourses(String.valueOf(perm));
+                        List<UniversityDAO.CourseOffering> result = dao.listCurrentCourses(String.valueOf(perm), CURRENT_QUARTER, CURRENT_YEAR);
                         if (result.isEmpty()) {
                             System.out.println("You are not enrolled in any courses this quarter.");
                         } else {
@@ -192,10 +196,8 @@ public class ConsoleUI {
                 
             
                     case "4":
-                    int currentQuarter = 1;
-                    int currentYear = 2025;
                     try {
-                        List<UniversityDAO.CompletedCourse> completed = dao.getPreviousQuarterGrades(String.valueOf(perm), currentQuarter, currentYear);
+                        List<UniversityDAO.CompletedCourse> completed = dao.getPreviousQuarterGrades(String.valueOf(perm), CURRENT_QUARTER, CURRENT_YEAR);
                         if (completed.isEmpty()) {
                             System.out.println("No grades found for the previous quarter.");
                         } else {
@@ -309,7 +311,204 @@ public class ConsoleUI {
 
     }
 
-    public void registrar_ui(UniversityDAO dao){
+    public void registrar_ui(UniversityDAO dao) {
+        Scanner scanner = new Scanner(System.in);
+    
         System.out.println("Welcome to the Registrar!");
+    
+        // while (true) {
+        //     System.out.println("\n===== 📋 Registrar Menu 📋 =====");
+        //     System.out.println("1. Add a student to a course");
+        //     System.out.println("2. Drop a student from a course");
+        //     System.out.println("3. List courses taken by a student");
+        //     System.out.println("4. List previous quarter grades for a student");
+        //     System.out.println("5. Generate class list for a course");
+        //     System.out.println("6. Enter grades for a course (from file)");
+        //     System.out.println("7. Request transcript for a student");
+        //     System.out.println("8. Generate grade mailers for all students");
+        //     System.out.println("0. Exit Registrar");
+        //     System.out.print("Choose an option: ");
+    
+        //     String choice = scanner.nextLine().trim();
+    
+        //     try {
+        //         switch (choice) {
+        //             case "1": {
+        //                 System.out.print("Enter student PERM (5 digits): ");
+        //                 String perm = scanner.nextLine().trim();
+        //                 System.out.print("Enter course enrollment code (5 digits): ");
+        //                 String codeStr = scanner.nextLine().trim();
+    
+        //                 if (perm.matches("\\d{5}") && codeStr.matches("\\d{5}")) {
+        //                     int code = Integer.parseInt(codeStr);
+        //                     boolean success = dao.enrollStudentInCourse(perm, code);
+        //                     if (success) {
+        //                         System.out.println("✅ Student " + perm + " added to course " + code);
+        //                     } else {
+        //                         System.out.println("❌ Failed to add student to course.");
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid PERM or course code format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "2": {
+        //                 System.out.print("Enter student PERM (5 digits): ");
+        //                 String perm = scanner.nextLine().trim();
+        //                 System.out.print("Enter course enrollment code (5 digits): ");
+        //                 String codeStr = scanner.nextLine().trim();
+    
+        //                 if (perm.matches("\\d{5}") && codeStr.matches("\\d{5}")) {
+        //                     int code = Integer.parseInt(codeStr);
+        //                     boolean success = dao.dropStudentFromCourse(perm, code);
+        //                     if (success) {
+        //                         System.out.println("✅ Student " + perm + " dropped from course " + code);
+        //                     } else {
+        //                         System.out.println("❌ Failed to drop student from course.");
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid PERM or course code format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "3": {
+        //                 System.out.print("Enter student PERM (5 digits): ");
+        //                 String perm = scanner.nextLine().trim();
+        //                 if (perm.matches("\\d{5}")) {
+        //                     List<UniversityDAO.CourseOffering> courses = dao.listAllCoursesTaken(perm);
+        //                     if (courses.isEmpty()) {
+        //                         System.out.println("No courses found for student " + perm);
+        //                     } else {
+        //                         System.out.printf("%-8s | %-8s | %-30s | %-10s | %-4s%n",
+        //                             "Enroll#", "Course", "Title", "Quarter", "Year");
+        //                         System.out.println("------------------------------------------------------------");
+        //                         for (UniversityDAO.CourseOffering c : courses) {
+        //                             String quarterStr = switch (c.quarter) {
+        //                                 case 1 -> "Winter";
+        //                                 case 2 -> "Spring";
+        //                                 case 3 -> "Summer";
+        //                                 case 4 -> "Fall";
+        //                                 default -> "Unknown";
+        //                             };
+        //                             System.out.printf("%-8d | %-8s | %-30s | %-10s | %-4d%n",
+        //                                 c.enrollmentCode, c.courseNo, c.title, quarterStr, c.year);
+        //                         }
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid PERM format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "4": {
+        //                 System.out.print("Enter student PERM (5 digits): ");
+        //                 String perm = scanner.nextLine().trim();
+        //                 System.out.print("Enter quarter (1=Winter, 2=Spring, 3=Summer, 4=Fall): ");
+        //                 String quarterStr = scanner.nextLine().trim();
+        //                 System.out.print("Enter year (e.g., 2025): ");
+        //                 String yearStr = scanner.nextLine().trim();
+    
+        //                 if (perm.matches("\\d{5}") && quarterStr.matches("[1-4]") && yearStr.matches("\\d{4}")) {
+        //                     int quarter = Integer.parseInt(quarterStr);
+        //                     int year = Integer.parseInt(yearStr);
+        //                     List<UniversityDAO.CompletedCourse> grades = dao.getPreviousQuarterGrades(perm, quarter, year);
+        //                     if (grades.isEmpty()) {
+        //                         System.out.println("No grades found for student " + perm + " in the specified quarter.");
+        //                     } else {
+        //                         System.out.printf("%-8s | %-30s | %-8s | %-6s | %-5s%n",
+        //                             "Course", "Title", "Quarter", "Year", "Grade");
+        //                         System.out.println("--------------------------------------------------------------------------");
+        //                         for (UniversityDAO.CompletedCourse course : grades) {
+        //                             String qStr = switch (course.quarter) {
+        //                                 case 1 -> "Winter";
+        //                                 case 2 -> "Spring";
+        //                                 case 3 -> "Summer";
+        //                                 case 4 -> "Fall";
+        //                                 default -> "Unknown";
+        //                             };
+        //                             System.out.printf("%-8s | %-30s | %-8s | %-6d | %-5s%n",
+        //                                 course.courseNo, course.title, qStr, course.year, course.grade);
+        //                         }
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid input format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "5": {
+        //                 System.out.print("Enter course enrollment code (5 digits): ");
+        //                 String codeStr = scanner.nextLine().trim();
+        //                 if (codeStr.matches("\\d{5}")) {
+        //                     int code = Integer.parseInt(codeStr);
+        //                     List<UniversityDAO.StudentRecord> classList = dao.generateClassList(code);
+        //                     if (classList.isEmpty()) {
+        //                         System.out.println("No students found for course " + code);
+        //                     } else {
+        //                         System.out.printf("%-8s | %-20s | %-10s%n", "PERM", "Student Name", "Email");
+        //                         System.out.println("------------------------------------------------");
+        //                         for (UniversityDAO.StudentRecord student : classList) {
+        //                             System.out.printf("%-8s | %-20s | %-10s%n", student.perm, student.name, student.email);
+        //                         }
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid course code format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "6": {
+        //                 System.out.print("Enter course enrollment code (5 digits): ");
+        //                 String codeStr = scanner.nextLine().trim();
+        //                 System.out.print("Enter filename for grades (CSV or similar): ");
+        //                 String filename = scanner.nextLine().trim();
+    
+        //                 if (codeStr.matches("\\d{5}")) {
+        //                     int code = Integer.parseInt(codeStr);
+        //                     boolean success = dao.enterGradesFromFile(code, filename);
+        //                     if (success) {
+        //                         System.out.println("✅ Grades entered successfully for course " + code);
+        //                     } else {
+        //                         System.out.println("❌ Failed to enter grades.");
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid course code format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "7": {
+        //                 System.out.print("Enter student PERM (5 digits): ");
+        //                 String perm = scanner.nextLine().trim();
+        //                 if (perm.matches("\\d{5}")) {
+        //                     String transcript = dao.requestTranscript(perm);
+        //                     if (transcript != null && !transcript.isEmpty()) {
+        //                         System.out.println("Transcript for student " + perm + ":\n");
+        //                         System.out.println(transcript);
+        //                     } else {
+        //                         System.out.println("❌ Transcript not available.");
+        //                     }
+        //                 } else {
+        //                     System.out.println("❌ Invalid PERM format.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "8": {
+        //                 System.out.println("Generating grade mailers for all students...");
+        //                 boolean success = dao.generateGradeMailers();
+        //                 if (success) {
+        //                     System.out.println("✅ Grade mailers generated successfully.");
+        //                 } else {
+        //                     System.out.println("❌ Failed to generate grade mailers.");
+        //                 }
+        //                 break;
+        //             }
+        //             case "0":
+        //                 System.out.println("Exiting Registrar...");
+        //                 return;
+        //             default:
+        //                 System.out.println("Invalid option. Please try again.");
+        //         }
+        //     } catch (SQLException e) {
+        //         System.out.println("❌ Database error: " + e.getMessage());
+        //     }
+        // }
     }
+    
 }

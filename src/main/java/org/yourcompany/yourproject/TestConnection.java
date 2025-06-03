@@ -10,20 +10,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 import org.yourcompany.yourproject.UniversityDAO.GradeEntry;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.pool.OracleDataSource;
 
 public class TestConnection {
-    private static final Dotenv env = Dotenv.load();
-    private static final String DB_URL      = env.get("DB_URL");
-    private static final String DB_USER     = env.get("DB_USER");
-    private static final String DB_PASSWORD = env.get("DB_PASSWORD");
+    // private static final Dotenv env = Dotenv.load();
+    // private static final String DB_URL      = env.get("DB_URL");
+    // private static final String DB_USER     = env.get("DB_USER");
+    // private static final String DB_PASSWORD = env.get("DB_PASSWORD");
+    private static final String DB_URL = "jdbc:oracle:thin:@aneesh174a_low?TNS_ADMIN=/Users/nilaykundu/Desktop/UCSB/3-JUNIOR/Spring/cs174a/Wallet_aneesh174a";
+    // private static final String DB_URL = "jdbc:oracle:thin:@aneesh174a_low";
+    private static final String DB_USER = "ADMIN";
+    private static final String DB_PASSWORD = "oraclepassword174A";
 
     public static void main(String[] args) {
         Properties info = new Properties();
@@ -56,7 +60,7 @@ public class TestConnection {
                 dao.addMajor("ECE", "ECE", 5);
 
                 // 2) Master Course List
-                String[] courses = { "CS174","CS170","CS160","CS026","EC154","EC140","EC015" };
+                String[] courses = {"CS174","CS170","CS160","CS026","EC154","EC140","EC015", "CS154","CS130","CS010","EC152","EC010"};
                 for (String c : courses) {
                     dao.addCourse(c, c);
                 }
@@ -74,6 +78,13 @@ public class TestConnection {
                 dao.addSetting("Maths","3333","T",1500,1700);
                 dao.addSetting("Chem","1234","TR",1300,1500);
                 dao.addSetting("Engr","2116","MW",1100,1300);
+                dao.addSetting("Engr",   "2116", "MF",  800, 1000);  // CS154 (MF@8–10)
+                dao.addSetting("Engr",   "2116", "MWF",  800, 1000);  // CS154 in Fall ’24 (MWF@8–10)
+                dao.addSetting("Engr",   "3163", "MW",  1100, 1300);  // EC152
+                dao.addSetting("Engr",   "1124", "TR",  1400, 1600);  // EC015
+                dao.addSetting("Chem",   "1111", "TR",  1400, 1600);  // CS130 in Winter ’25
+                dao.addSetting("Chem",   "3333", "MWF", 1500, 1700);  // CS010 in Fall ’24
+                dao.addSetting("Physics","4004", "MWF",  800, 1000);  // EC010 in Fall ’24
 
                 Object[][] students = {
                     {"12345","Alfred","Hitchcock","12345","6667 El Colegio #40","CS","CS"},
@@ -107,34 +118,346 @@ public class TestConnection {
                 }
 
                 System.out.println("-- Adding historical offerings --");
-                // Fall 2024 offerings
 
-                dao.addSetting("ENGR", "201", "MWF", 900, 950);
+                System.out.println("-- Adding Spring 2025 offerings --");
+                dao.addCourseOffering(12345, "CS174", "Psycho", "1132", "TR", 1000, 2, 2025, 8,  "Venus", "");  // CS130, CS026 prereqs added below
+                dao.addCourseOffering(54321, "CS170", "English","1124","MWF",1000, 2, 2025, 8,  "Jupiter","");
+                dao.addCourseOffering(41725, "CS160", "Engr",  "1132","MWF",1400, 2, 2025, 8,  "Mercury","");
+                dao.addCourseOffering(76543, "CS026", "Bio",   "2222","MWF",1400, 2, 2025, 8,  "Mars",   "");
+                dao.addCourseOffering(93156, "EC154", "Maths", "3333","T",  1500, 2, 2025, 7,  "Saturn","");
+                dao.addCourseOffering(19023, "EC140", "Chem",  "1234","TR", 1300, 2, 2025, 10, "Gold",   "");
+                dao.addCourseOffering(71631, "EC015", "Engr",  "2116","MW", 1100, 2, 2025, 8,  "Silver","");
 
-                // --- Simple test routine ---
-                System.out.println("-- Adding test student and course offering --");
-                dao.addCourseOffering(87654, "CS026", "Bio", "2222", "MWF", 1400, 4, 2024, 8, "Saturn", "");
-                dao.addCourseOffering(13579, "CS160", "Engr", "1132", "MWF", 1400, 4, 2024, 8, "Mercury", "");
-                dao.addCourseOffering(97531, "EC140", "Chem", "1234", "TR", 1300, 4, 2024, 10, "Gold", "");
-                dao.addCourseOffering(24680, "CS170", "English", "1124", "MWF", 1000, 1, 2025, 8, "Jupiter", "");
-                dao.addCourseOffering(86420, "EC015", "Engr", "2116", "MW", 1100, 1, 2025, 8, "Silver", "");
+                System.out.println("-- Adding Winter 2025 offerings --");
+                dao.addCourseOffering(54321, "CS170", "English","1124","MWF",1000, 1, 2025, 18, "Copper","");
+                dao.addCourseOffering(41725, "CS160", "Engr",  "1132","MWF",1400, 1, 2025, 15, "Iron",  "");
+                dao.addCourseOffering(32165, "CS154", "Engr",  "2116","MF",  800, 1, 2025, 10, "Tin",   "");
+                dao.addCourseOffering(56789, "CS130", "Chem",  "1111","TR", 1400, 1, 2025, 15, "Star",  "");
+                dao.addCourseOffering(76543, "CS026", "Bio",   "2222","MWF",1400, 1, 2025, 15, "Tin",   "");
+                dao.addCourseOffering(93156, "EC154", "Maths", "3333","T",  1500, 1, 2025, 18, "Saturn","");
+                dao.addCourseOffering(91823, "EC152", "Engr",  "3163","MW", 1100, 1, 2025, 10, "Gold",  "");
 
-                // System.out.println("-- Populating completed courses (historical) --");
-                // // Fall 2024 grades for offering 87654
-                // List<GradeEntry> grades87654 = Arrays.asList(
-                //     new GradeEntry("12345","A"),
-                //     new GradeEntry("14682","B"),
-                //     new GradeEntry("37642","A-")
-                // );
-                // dao.enterGrades(87654, grades87654);
+                System.out.println("-- Adding Fall 2024 offerings --");
+                dao.addCourseOffering(54321, "CS170", "English","1124","MWF",1000, 4, 2024, 15, "Copper","");
+                dao.addCourseOffering(41725, "CS160", "Engr",  "1132","MWF",1400, 4, 2024, 10, "Mercury","");
+                dao.addCourseOffering(32165, "CS154", "Engr",  "2116","MWF", 800, 4, 2024, 10, "Mars",   "");
+                dao.addCourseOffering(56789, "CS130", "Chem",  "1111","TR", 1400, 4, 2024, 15, "Jupiter","");
+                dao.addCourseOffering(76543, "CS026", "Bio",   "2222","MWF",1400, 4, 2024, 15, "Tin",    "");
+                dao.addCourseOffering(81623, "CS010", "Chem",  "3333","MWF",1500, 4, 2024, 10, "Gold",   "");
+                dao.addCourseOffering(93156, "EC154", "Maths", "3333","T",  1500, 4, 2024, 10, "Silver","");
+                dao.addCourseOffering(91823, "EC152", "Engr",  "3163","MW", 1100, 4, 2024, 10, "Sun",    "");
+                dao.addCourseOffering(71631, "EC015", "Engr",  "1124","TR", 1400, 4, 2024, 15, "Moon",   "");
+                dao.addCourseOffering(82612, "EC010", "Physics","4004","MWF", 800, 4, 2024, 15, "Earth","");
 
-                // // Winter 2025 grades for offering 24680
-                // List<GradeEntry> grades24680 = Arrays.asList(
-                //     new GradeEntry("12345","B+"),
-                //     new GradeEntry("37642","A")
-                // );
-                // dao.enterGrades(24680, grades24680);
+                                // --- Prerequisites (Spring ’25) ---
+                System.out.println("-- Adding prerequisites --");
+                dao.addPrerequisite("CS174", "CS130");
+                dao.addPrerequisite("CS174", "CS026");
+                dao.addPrerequisite("CS170", "CS130");
+                dao.addPrerequisite("CS170", "CS154");
+                dao.addPrerequisite("CS160", "CS026");
+                dao.addPrerequisite("EC154", "CS026");
+                dao.addPrerequisite("EC152", "CS026");
+                dao.addPrerequisite("EC154", "EC152");
+                dao.addPrerequisite("CS154", "CS130");
 
+                // --- Major requirements (Part 3) ---
+                System.out.println("-- Adding major requirements --");
+                String[] required = {"CS026","CS130","CS154","CS160","CS170"};
+                String[] electives = {"CS010","EC010","EC015","EC140","EC152","EC154","CS174"};
+                for (String req : required) {
+                    dao.addMandatoryCourse("CS",  req);
+                    dao.addMandatoryCourse("ECE", req);
+                }
+                for (String ele : electives) {
+                    dao.addMajorElective("CS",  ele);
+                    dao.addMajorElective("ECE", ele);
+                }
+
+                // --- Seeding historical “Taken” enrollments & grades ---
+                // (Fall 2024: quarter=4, year=2024; Winter 2025: quarter=1, year=2025)
+
+                System.out.println("-- Loading Fall 2024 completed courses --");
+                // Alfred Hitchcock (perm=12345): CS026 A, CS010 A :contentReference[oaicite:0]{index=0}
+                // dao.enrollStudentInCourse("12345", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 76543, 4, 2024, "A")
+                ));
+                // dao.enrollStudentInCourse("12345", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 81623, 4, 2024, "A")
+                ));
+                // dao.enrollStudentInCourse("12345", 91823, 4, 2024);
+                // dao.enterGrades(Arrays.asList(
+                //     new GradeEntry("12345", 91823, 4, 2024, "A")
+                // ));
+
+                // Billy Clinton (perm=14682): CS026 B, CS010 A :contentReference[oaicite:1]{index=1}
+                // dao.enrollStudentInCourse("14682", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 76543, 4, 2024, "B")
+                ));
+                // dao.enrollStudentInCourse("14682", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 81623, 4, 2024, "A")
+                ));
+
+                // Cindy Laugher (perm=37642): EC015 B, EC010 A :contentReference[oaicite:2]{index=2}
+                // dao.enrollStudentInCourse("37642", 71631, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 71631, 4, 2024, "B")
+                ));
+                // dao.enrollStudentInCourse("37642", 82612, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 82612, 4, 2024, "A")
+                ));
+
+                // David Copperfill (perm=85821): CS010 A, EC015 B :contentReference[oaicite:3]{index=3}
+                // dao.enrollStudentInCourse("85821", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 81623, 4, 2024, "A")
+                ));
+                // dao.enrollStudentInCourse("85821", 71631, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 71631, 4, 2024, "B")
+                ));
+
+                // Elizabeth Sailor (perm=38567): EC152 B, CS154 B :contentReference[oaicite:4]{index=4}
+                // dao.enrollStudentInCourse("38567", 91823, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 91823, 4, 2024, "B")
+                ));
+                // dao.enrollStudentInCourse("38567", 32165, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 32165, 4, 2024, "B")
+                ));
+
+                // Fatal Castro (perm=81934): CS026 A, EC152 B :contentReference[oaicite:5]{index=5}
+                // dao.enrollStudentInCourse("81934", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 76543, 4, 2024, "A")
+                ));
+                // dao.enrollStudentInCourse("81934", 91823, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 91823, 4, 2024, "B")
+                ));
+
+                // George Brush (perm=98246): CS154 A, CS130 B, CS026 A :contentReference[oaicite:6]{index=6}
+                // dao.enrollStudentInCourse("98246", 32165, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 32165, 4, 2024, "A")
+                ));
+                // dao.enrollStudentInCourse("98246", 56789, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 56789, 4, 2024, "B")
+                ));
+                // dao.enrollStudentInCourse("98246", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 76543, 4, 2024, "A")
+                ));
+
+                // Hurryson Ford (perm=35328): CS130 B, CS026 A :contentReference[oaicite:7]{index=7}
+                // dao.enrollStudentInCourse("35328", 56789, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("35328", 56789, 4, 2024, "B")
+                ));
+                // dao.enrollStudentInCourse("35328", 76543, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("35328", 76543, 4, 2024, "A")
+                ));
+
+                // Ivan Lendme (perm=84713): EC015 F, CS010 C :contentReference[oaicite:8]{index=8}
+                // dao.enrollStudentInCourse("84713", 71631, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("84713", 71631, 4, 2024, "F")
+                ));
+                // dao.enrollStudentInCourse("84713", 81623, 4, 2024);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("84713", 81623, 4, 2024, "C")
+                ));
+
+
+                // --- Now Winter 2025 completed courses ---
+                System.out.println("-- Loading Winter 2025 completed courses --");
+                // Alfred Hitchcock (perm=12345): CS154 A, CS130 B, EC154 C :contentReference[oaicite:9]{index=9}
+                System.out.println("Alfred Hitchcock");
+                // dao.enrollStudentInCourse("12345", 32165, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 32165, 1, 2025, "A")
+                ));
+                // dao.enrollStudentInCourse("12345", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 56789, 1, 2025, "B")
+                ));
+                // System.out.println("EC 154");
+                // dao.enrollStudentInCourse("12345", 93156, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("12345", 93156, 1, 2025, "C")
+                ));
+
+                // Billy Clinton (perm=14682): CS160 B, CS130 B :contentReference[oaicite:10]{index=10}
+                System.out.println("Billy Clinton");
+                // dao.enrollStudentInCourse("14682", 41725, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 41725, 1, 2025, "B")
+                ));
+                // dao.enrollStudentInCourse("14682", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("14682", 56789, 1, 2025, "B")
+                ));
+
+                // Cindy Laugher (perm=37642): EC152 C, CS130 B :contentReference[oaicite:11]{index=11}
+                System.out.println("Cindy Laugher");
+                // dao.enrollStudentInCourse("37642", 91823, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 91823, 1, 2025, "C")
+                ));
+                // dao.enrollStudentInCourse("37642", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("37642", 56789, 1, 2025, "B")
+                ));
+
+                // David Copperfill (perm=85821): CS130 C, CS026 A :contentReference[oaicite:12]{index=12}
+                System.out.println("David Copperfill");
+                // dao.enrollStudentInCourse("85821", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 56789, 1, 2025, "C")
+                ));
+                // dao.enrollStudentInCourse("85821", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("85821", 76543, 1, 2025, "A")
+                ));
+
+                // Elizabeth Sailor (perm=38567): EC154 C, CS130 A :contentReference[oaicite:13]{index=13}
+                System.out.println("Elizabeth Sailor");
+                // dao.enrollStudentInCourse("38567", 93156, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 93156, 1, 2025, "C")
+                ));
+                // dao.enrollStudentInCourse("38567", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("38567", 56789, 1, 2025, "A")
+                ));
+
+                // Fatal Castro (perm=81934): CS154 C, CS130 A :contentReference[oaicite:14]{index=14}
+                System.out.println("Fatal Castro");
+                // dao.enrollStudentInCourse("81934", 32165, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 32165, 1, 2025, "C")
+                ));
+                // dao.enrollStudentInCourse("81934", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("81934", 56789, 1, 2025, "A")
+                ));
+
+                // George Brush (perm=98246): EC152 B :contentReference[oaicite:15]{index=15}
+                System.out.println("George Brush");
+                // dao.enrollStudentInCourse("98246", 91823, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("98246", 91823, 1, 2025, "B")
+                ));
+
+                // Hurryson Ford (perm=35328): (none in 25W) :contentReference[oaicite:16]{index=16}
+
+                // Ivan Lendme (perm=84713): CS026 D :contentReference[oaicite:17]{index=17}
+                System.out.println("Ivan Lendme");
+                // dao.enrollStudentInCourse("84713", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("84713", 76543, 1, 2025, "D")
+                ));
+
+                // Kelvin Coster (perm=46590): CS026 A :contentReference[oaicite:18]{index=18}
+                System.out.println("Kelvin Coster");
+                // dao.enrollStudentInCourse("46590", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("46590", 76543, 1, 2025, "A")
+                ));
+
+                // Li Kung (perm=91734): CS026 A :contentReference[oaicite:19]{index=19}
+                // dao.enrollStudentInCourse("91734", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("91734", 76543, 1, 2025, "A")
+                ));
+
+                // Magic Jordon (perm=73521): CS026 B :contentReference[oaicite:20]{index=20}
+                // dao.enrollStudentInCourse("73521", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("73521", 76543, 1, 2025, "B")
+                ));
+
+                // Nam-hoi Chung (perm=53540): CS154 C, CS130 C :contentReference[oaicite:21]{index=21}
+                // dao.enrollStudentInCourse("53540", 32165, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("53540", 32165, 1, 2025, "C")
+                ));
+                // dao.enrollStudentInCourse("53540", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("53540", 56789, 1, 2025, "C")
+                ));
+
+                // Olive Stoner (perm=82452): EC152 C, CS026 C :contentReference[oaicite:22]{index=22}
+                // dao.enrollStudentInCourse("82452", 91823, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("82452", 91823, 1, 2025, "C")
+                ));
+                // dao.enrollStudentInCourse("82452", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("82452", 76543, 1, 2025, "C")
+                ));
+
+                // Pit Wilson (perm=18221): CS130 B, CS026 B :contentReference[oaicite:23]{index=23}
+                // dao.enrollStudentInCourse("18221", 56789, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("18221", 56789, 1, 2025, "B")
+                ));
+                // dao.enrollStudentInCourse("18221", 76543, 1, 2025);
+                dao.enterGrades(Arrays.asList(
+                    new GradeEntry("18221", 76543, 1, 2025, "B")
+                ));
+
+                // --- Now Spring 2025 completed courses ---
+                System.out.println("-- Loading Spring 2025 concurrent courses --");
+                int CURRENT_QUARTER = 2;
+                int CURRENT_YEAR = 2025;
+
+                // System.out.println(12345);
+                dao.enrollStudentInCourse("12345", 54321, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("12345", 41725, CURRENT_QUARTER, CURRENT_YEAR);
+                
+                // System.out.println(37642);
+                dao.enrollStudentInCourse("37642", 93156, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("37642", 41725, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(85821);
+                dao.enrollStudentInCourse("85821", 12345, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("85821", 41725, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(38567);
+                dao.enrollStudentInCourse("38567", 12345, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("38567", 54321, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("38567", 41725, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(81934);
+                dao.enrollStudentInCourse("81934", 93156, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(98246);
+                dao.enrollStudentInCourse("98246", 41725, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("98246", 12345, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("98246", 54321, CURRENT_QUARTER, CURRENT_YEAR);
+                dao.enrollStudentInCourse("98246", 93156, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(35328);
+                dao.enrollStudentInCourse("35328", 12345, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(53540);
+                dao.enrollStudentInCourse("53540", 54321, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(82452);
+                dao.enrollStudentInCourse("82452", 93156, CURRENT_QUARTER, CURRENT_YEAR);
+
+                // System.out.println(18221);
+                dao.enrollStudentInCourse("18221", 12345, CURRENT_QUARTER, CURRENT_YEAR);
+                
                 System.out.println("✅ Sample data (including history) loaded!");
             }
         } catch (SQLException e) {
@@ -300,30 +623,64 @@ class UniversityDAO {
 
     /** Verify that the provided rawPin (5 digits) matches the stored hash */
     public boolean verifyPin(String perm, String rawPin) throws SQLException {
-        String sql = "SELECT pin FROM Students WHERE perm = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return false;               // no such student
-                String storedHash = rs.getString("pin");
-                String candidateHash = hashPin(rawPin);
-                return storedHash.equals(candidateHash);
-            }
+        // String sql = "SELECT pin FROM Students WHERE perm = ?";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, perm);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         if (!rs.next()) return false;               // no such student
+        //         String storedHash = rs.getString("pin");
+        //         String candidateHash = hashPin(rawPin);
+        //         System.out.println("Stored: " + storedHash);
+        //         System.out.println("Input : " + candidateHash);
+
+        //         return storedHash.equals(candidateHash);
+        //     }
+        // }
+
+        String sql = "SELECT pin FROM Students WHERE perm = '" + perm + "'";
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (!rs.next()) return false; // no such student
+
+            String storedHash = rs.getString("pin");
+            String candidateHash = hashPin(rawPin);
+
+            System.out.println("Stored (len=" + storedHash.length() + "): " + storedHash);
+            System.out.println("Input  (len=" + candidateHash.length() + "): " + candidateHash);
+            System.out.println("Equal: " + storedHash.trim().equals(candidateHash.trim()));
+            return storedHash.trim().equals(candidateHash.trim());
         }
     }
 
     /** Change student PIN: only store the hash of the new PIN */
     public boolean setPin(String perm, String oldRawPin, String newRawPin) throws SQLException {
+        // // first verify old PIN
+        // if (!verifyPin(perm, oldRawPin)) {
+        //     System.out.println("mismatch");
+        //     return false;
+        // }
+        // String newHash = hashPin(newRawPin);
+        // String sql = "UPDATE Students SET pin = ? WHERE perm = ?";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, newHash);
+        //     ps.setString(2, perm);
+        //     return ps.executeUpdate() == 1;
+        // }
+
+
         // first verify old PIN
         if (!verifyPin(perm, oldRawPin)) {
+            System.out.println("mismatch");
             return false;
         }
+
         String newHash = hashPin(newRawPin);
-        String sql = "UPDATE Students SET pin = ? WHERE perm = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, newHash);
-            ps.setString(2, perm);
-            return ps.executeUpdate() == 1;
+        String sql = "UPDATE Students SET pin = '" + newHash + "' WHERE perm = '" + perm + "'";
+        System.out.println("SQL: " + sql); // Print the full SQL string
+
+        try (Statement stmt = conn.createStatement()) {
+            return stmt.executeUpdate(sql) == 1;
         }
     }
 
@@ -331,15 +688,32 @@ class UniversityDAO {
      * Get student information by perm number.
      */
     public Student getStudent(String perm) throws SQLException {
-        String sql = "SELECT * FROM Students WHERE perm = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new Student(rs);
-                }
-                return null;
+        // System.out.println("GETTING PERM: '" + perm + "'");
+    
+        // if (perm == null) return null;
+        // perm = perm.trim(); // removes leading/trailing spaces
+
+        // System.out.println("GETTING PERM (cleaned): '" + perm + "' (length: " + perm.length() + ")");
+
+        // String sql = "SELECT * FROM Students WHERE perm = ?";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, perm);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         if (rs.next()) {
+        //             return new Student(rs);
+        //         }
+        //         return null;
+        //     }
+        // }
+
+        String sql = "SELECT * FROM Students WHERE perm = '" + perm + "'";
+
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return new Student(rs);
             }
+            return null;
         }
     }
 
@@ -374,18 +748,33 @@ class UniversityDAO {
     /**
      * Get course offering details by enrollment code.
      */
-    public CourseOffering getCourseOffering(int enrollCode) throws SQLException {
-        String sql = "SELECT o.*, c.title FROM Course_Offerings o " +
-                     "JOIN Courses c ON o.course_no = c.course_no " +
-                     "WHERE o.enrollment_code = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, enrollCode);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new CourseOffering(rs);
-                }
-                return null;
+    public CourseOffering getCourseOffering(int enrollCode, int quarter, int year) throws SQLException {
+        // String sql = "SELECT o.*, c.title FROM Course_Offerings o " +
+        //              "JOIN Courses c ON o.course_no = c.course_no " +
+        //              "WHERE o.enrollment_code = ?";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setInt(1, enrollCode);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         if (rs.next()) {
+        //             return new CourseOffering(rs);
+        //         }
+        //         return null;
+        //     }
+        // }
+
+        String sql = "SELECT o.*, c.title " +
+                 "FROM Course_Offerings o " +
+                 "JOIN Courses c ON o.course_no = c.course_no " +
+                 "WHERE o.enrollment_code = " + enrollCode +
+                 " AND o.quarter = " + quarter +
+                 " AND o.year = " + year;
+
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return new CourseOffering(rs);
             }
+            return null;
         }
     }
 
@@ -393,21 +782,37 @@ class UniversityDAO {
      * Check if course has available spots for enrollment.
      */
     public boolean hasAvailableSpots(int enrollCode) throws SQLException {
-        String sql = "SELECT o.max_enrollment, COUNT(e.perm) as current_enrollment " +
-                     "FROM Course_Offerings o " +
-                     "LEFT JOIN Currently_Enrolled e ON o.enrollment_code = e.enrollment_code AND e.dropped = 'N' " +
-                     "WHERE o.enrollment_code = ? " +
-                     "GROUP BY o.max_enrollment";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, enrollCode);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int maxEnrollment = rs.getInt("max_enrollment");
-                    int currentEnrollment = rs.getInt("current_enrollment");
-                    return currentEnrollment < maxEnrollment;
-                }
-                return false;
+        // String sql = "SELECT o.max_enrollment, COUNT(e.perm) as current_enrollment " +
+        //              "FROM Course_Offerings o " +
+        //              "LEFT JOIN Currently_Enrolled e ON o.enrollment_code = e.enrollment_code AND e.dropped = 'N' " +
+        //              "WHERE o.enrollment_code = ? " +
+        //              "GROUP BY o.max_enrollment";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setInt(1, enrollCode);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         if (rs.next()) {
+        //             int maxEnrollment = rs.getInt("max_enrollment");
+        //             int currentEnrollment = rs.getInt("current_enrollment");
+        //             return currentEnrollment < maxEnrollment;
+        //         }
+        //         return false;
+        //     }
+        // }
+
+        String sql = "SELECT o.max_enrollment, COUNT(e.perm) AS current_enrollment " +
+                 "FROM Course_Offerings o " +
+                 "LEFT JOIN Currently_Enrolled e ON o.enrollment_code = e.enrollment_code AND e.dropped = 'N' AND e.quarter = o.quarter AND e.year = o.year "+
+                 "WHERE o.enrollment_code = " + enrollCode + " " +
+                 "GROUP BY o.max_enrollment";
+
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                int maxEnrollment = rs.getInt("max_enrollment");
+                int currentEnrollment = rs.getInt("current_enrollment");
+                return currentEnrollment < maxEnrollment;
             }
+            return false;
         }
     }
 
@@ -417,19 +822,64 @@ class UniversityDAO {
      * Check prerequisites for a course before enrollment.
      */
     public boolean hasCompletedPrerequisites(String perm, String courseNo) throws SQLException {
-        String sql = "SELECT COUNT(*) as missing FROM Is_Prerequisite p " +
-                     "WHERE p.course_no = ? AND p.prereq_course_no NOT IN (" +
-                     "    SELECT o.course_no FROM Completed_Course c " +
-                     "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-                     "    WHERE c.perm = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')" +
-                     ")";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, courseNo);
-            ps.setString(2, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt("missing") == 0;
-            }
+        // String sql = "SELECT COUNT(*) as missing FROM Is_Prerequisite p " +
+        //              "WHERE p.course_no = ? AND p.prereq_course_no NOT IN (" +
+        //              "    SELECT o.course_no FROM Completed_Course c " +
+        //              "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+        //              "    WHERE c.perm = ? AND c.grade IN ('A+','A','A-','B+','B','B-','C+','C')" +
+        //              ")";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, courseNo);
+        //     ps.setString(2, perm);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         rs.next();
+        //         return rs.getInt("missing") == 0;
+        //     }
+        // }
+
+
+    //     String sql = "SELECT COUNT(*) AS missing " +
+    //              "FROM Is_Prerequisite p " +
+    //              "WHERE p.course_no = '" + courseNo + "' " +
+    //              "AND p.prereq_course_no NOT IN ( " +
+    //              "    SELECT o.course_no " +
+    //              "    FROM Completed_Course c " +
+    //              "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+    //              "        AND c.quarter = o.quarter AND c.year = o.year " +
+    //              "    WHERE c.perm = '" + perm + "' " +
+    //              "    AND c.grade IN ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C') " +
+    //              ")";
+
+    //     try (Statement stmt = conn.createStatement();
+    //         ResultSet rs = stmt.executeQuery(sql)) {
+    //         rs.next();
+    //         return rs.getInt("missing") == 0;
+    //     }
+        String sql =
+        "SELECT COUNT(*) AS missing " +
+        "FROM Is_Prerequisite p " +
+        "WHERE p.course_no = '" + courseNo + "' " +
+        "AND p.prereq_course_no NOT IN ( " +
+        "    SELECT o.course_no " +
+        "    FROM Completed_Course c " +
+        "    JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+        "        AND c.quarter = o.quarter AND c.year = o.year " +
+        "    WHERE c.perm = '" + perm + "' " +
+        "      AND c.grade IN ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C') " +
+        "    UNION " +
+        "    SELECT p2.prereq_course_no " +
+        "    FROM Completed_Course c2 " +
+        "    JOIN Course_Offerings o2 ON c2.enrollment_code = o2.enrollment_code " +
+        "        AND c2.quarter = o2.quarter AND c2.year = o2.year " +
+        "    JOIN Is_Prerequisite p2 ON o2.course_no = p2.course_no " +
+        "    WHERE c2.perm = '" + perm + "' " +
+        "      AND c2.grade IN ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C') " +
+        ")";
+
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            rs.next();
+            return rs.getInt("missing") == 0;
         }
     }
 
@@ -437,23 +887,36 @@ class UniversityDAO {
      * Get current enrollment count for a student.
      */
     public int getCurrentEnrollmentCount(String perm) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Currently_Enrolled WHERE perm = ? AND dropped = 'N'";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
+        // String sql = "SELECT COUNT(*) FROM Currently_Enrolled WHERE perm = ? AND dropped = 'N'";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, perm);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         rs.next();
+        //         return rs.getInt(1);
+        //     }
+        // }
+        String sql = "SELECT COUNT(*) FROM Currently_Enrolled WHERE perm = '" + perm + "' AND dropped = 'N'";
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
                 return rs.getInt(1);
             }
+            return 0;
         }
     }
 
     /**
      * Enroll a student in a course with validation.
      */
-    public boolean enrollStudentInCourse(String perm, int enrollCode) throws SQLException {
+    public boolean enrollStudentInCourse(String perm, int enrollCode, int quarter, int year) throws SQLException {
         // Check if student exists
         if (getStudent(perm) == null) {
             throw new SQLException("Student not found");
+        }
+
+        CourseOffering offering = getCourseOffering(enrollCode, quarter, year);
+        if (offering == null){
+            throw new SQLException("Course is not offered");
         }
 
         // Check enrollment limit (max 5 courses)
@@ -467,8 +930,7 @@ class UniversityDAO {
         }
 
         // Check prerequisites
-        CourseOffering offering = getCourseOffering(enrollCode);
-        if (offering != null && !hasCompletedPrerequisites(perm, offering.courseNo)) {
+        if (!hasCompletedPrerequisites(perm, offering.courseNo)) {
             throw new SQLException("Prerequisites not met");
         }
 
@@ -477,11 +939,17 @@ class UniversityDAO {
             throw new SQLException("Student already enrolled in this course");
         }
 
-        String sql = "INSERT INTO Currently_Enrolled (perm, enrollment_code, dropped) VALUES (?, ?, 'N')";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            ps.setInt(2, enrollCode);
-            return ps.executeUpdate() > 0;
+        // String sql = "INSERT INTO Currently_Enrolled (perm, enrollment_code, dropped) VALUES (?, ?, 'N')";
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, perm);
+        //     ps.setInt(2, enrollCode);
+        //     return ps.executeUpdate() > 0;
+        // }
+        String sql = "INSERT INTO Currently_Enrolled (perm, enrollment_code, quarter, year, dropped) " +
+             "VALUES ('" + perm + "', " + enrollCode + ", " + quarter + ", " + year + ", 'N')";
+
+        try (Statement stmt = conn.createStatement()) {
+            return stmt.executeUpdate(sql) > 0;
         }
     }
 
@@ -503,39 +971,102 @@ class UniversityDAO {
     /**
      * Drop a student from a course with validation.
      */
-    public boolean dropStudentFromCourse(String perm, int enrollCode) throws SQLException {
-        // Check if this is the only course (can't drop if it's the only one)
-        if (getCurrentEnrollmentCount(perm) <= 1) {
-            throw new SQLException("Cannot drop from the only enrolled course");
-        }
+    public boolean dropStudentFromCourse(String perm, int enrollmentCode, int quarter, int year) throws SQLException {
+        String sql =
+        "UPDATE Currently_Enrolled " +
+        "SET dropped = 'Y' " +
+        "WHERE perm = '" + perm + "' " +
+        "  AND enrollment_code = " + enrollmentCode + " " +
+        "  AND quarter = " + quarter + " " +
+        "  AND year = " + year + " " +
+        "  AND dropped = 'N'";
 
-        // Mark as dropped instead of deleting to maintain history
-        String sql = "UPDATE Currently_Enrolled SET dropped = 'Y' WHERE perm = ? AND enrollment_code = ? AND dropped = 'N'";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            ps.setInt(2, enrollCode);
-            return ps.executeUpdate() > 0;
+        try (Statement stmt = conn.createStatement()) {
+            return stmt.executeUpdate(sql) == 1;
         }
     }
 
     /**
      * List courses in which a student is currently enrolled.
      */
-    public List<CourseOffering> listCurrentCourses(String perm) throws SQLException {
-        String sql = "SELECT o.*, c.title FROM Course_Offerings o " +
-                     "JOIN Currently_Enrolled e ON o.enrollment_code = e.enrollment_code " +
-                     "JOIN Courses c ON o.course_no = c.course_no " +
-                     "WHERE e.perm = ? AND e.dropped = 'N'";
-        List<CourseOffering> list = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new CourseOffering(rs));
-                }
+    // public List<CourseOffering> listCurrentCourses(String perm) throws SQLException {
+    //     // String sql = "SELECT o.*, c.title FROM Course_Offerings o " +
+    //     //              "JOIN Currently_Enrolled e ON o.enrollment_code = e.enrollment_code " +
+    //     //              "JOIN Courses c ON o.course_no = c.course_no " +
+    //     //              "WHERE e.perm = ? AND e.dropped = 'N'";
+    //     // List<CourseOffering> list = new ArrayList<>();
+    //     // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+    //     //     ps.setString(1, perm);
+    //     //     try (ResultSet rs = ps.executeQuery()) {
+    //     //         while (rs.next()) {
+    //     //             list.add(new CourseOffering(rs));
+    //     //         }
+    //     //     }
+    //     // }
+    //     // return list;
+    //     String sql = "SELECT o.*, c.title FROM Course_Offerings o " +
+    //              "JOIN Currently_Enrolled e ON o.enrollment_code = e.enrollment_code " +
+    //              "JOIN Courses c ON o.course_no = c.course_no " +
+    //              "WHERE e.perm = '" + perm + "' AND e.dropped = 'N'";
+
+    //     List<CourseOffering> list = new ArrayList<>();
+    //     try (Statement stmt = conn.createStatement();
+    //         ResultSet rs = stmt.executeQuery(sql)) {
+    //         while (rs.next()) {
+    //             list.add(new CourseOffering(rs));
+    //         }
+    //     }
+    //     return list;
+    // }
+    public List<CourseOffering> listCurrentCourses(String perm, int quarter, int year) throws SQLException {
+        // String sql =
+        //     "SELECT o.*, c.title " +
+        //     "FROM Currently_Enrolled e " +
+        //     "JOIN Course_Offerings o " +
+        //     "  ON e.enrollment_code = o.enrollment_code " +
+        //     "  AND e.quarter         = o.quarter " +
+        //     "  AND e.year            = o.year " +
+        //     "JOIN Courses c " +
+        //     "  ON o.course_no = c.course_no " +
+        //     "WHERE e.perm    = ? " +
+        //     "  AND e.quarter = ? " +
+        //     "  AND e.year    = ? " +
+        //     "  AND e.dropped = 'N'";
+
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, perm);
+        //     ps.setInt(2, quarter);
+        //     ps.setInt(3, year);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         List<CourseOffering> offerings = new ArrayList<>();
+        //         while (rs.next()) {
+        //             offerings.add(new CourseOffering(rs));
+        //         }
+        //         return offerings;
+        //     }
+        // }
+        String sql =
+        "SELECT o.*, c.title " +
+        "FROM Currently_Enrolled e " +
+        "JOIN Course_Offerings o " +
+        "  ON e.enrollment_code = o.enrollment_code " +
+        "  AND e.quarter         = o.quarter " +
+        "  AND e.year            = o.year " +
+        "JOIN Courses c " +
+        "  ON o.course_no = c.course_no " +
+        "WHERE e.perm    = '" + perm + "' " +
+        "  AND e.quarter = " + quarter + " " +
+        "  AND e.year    = " + year + " " +
+        "  AND e.dropped = 'N'";
+
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            List<CourseOffering> offerings = new ArrayList<>();
+            while (rs.next()) {
+                offerings.add(new CourseOffering(rs));
             }
+            return offerings;
         }
-        return list;
     }
 
     /**
@@ -562,14 +1093,18 @@ class UniversityDAO {
     /**
      * Enter grades for a course (batch operation).
      */
-    public void enterGrades(int enrollCode, List<GradeEntry> grades) throws SQLException {
-        String sql = "INSERT INTO Completed_Course (perm, enrollment_code, grade) VALUES (?, ?, ?) " +
-                     "ON CONFLICT (perm, enrollment_code) DO UPDATE SET grade = EXCLUDED.grade";
+    public void enterGrades(List<GradeEntry> gradeEntries) throws SQLException {
+        String sql =
+            "INSERT INTO Completed_Course " +
+            "  (perm, enrollment_code, quarter, year, grade) " +
+            "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            for (GradeEntry grade : grades) {
-                ps.setString(1, grade.perm);
-                ps.setInt(2, enrollCode);
-                ps.setString(3, grade.grade);
+            for (GradeEntry ge : gradeEntries) {
+                ps.setString(1, ge.getPerm());
+                ps.setInt(2, ge.getEnrollmentCode());
+                ps.setInt(3, ge.getQuarter());
+                ps.setInt(4, ge.getYear());
+                ps.setString(5, ge.getGrade());
                 ps.addBatch();
             }
             ps.executeBatch();
@@ -581,24 +1116,50 @@ class UniversityDAO {
      */
     public List<CompletedCourse> getPreviousQuarterGrades(String perm, int currentQuarter, int currentYear) throws SQLException {
         // Calculate previous quarter
-        int prevQuarter = currentQuarter == 1 ? 3 : currentQuarter - 1;
-        int prevYear = currentQuarter == 1 ? currentYear - 1 : currentYear;
+        int prevQuarter = currentQuarter - 1;
+        int prevYear = currentYear;
+        if (prevQuarter == 0){
+            prevQuarter = 4;
+            prevYear = currentYear - 1;
+        }
+        if (prevQuarter == 3){
+            prevQuarter = 2;
+        }
+        // int prevQuarter = currentQuarter == 1 ? 4 : currentQuarter - 1;
+        // int prevYear = currentQuarter == 1 ? currentYear - 1 : currentYear;
+
+        // String sql = "SELECT c.*, o.course_no, o.quarter, o.year, co.title " +
+        //              "FROM Completed_Course c " +
+        //              "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+        //              "JOIN Courses co ON o.course_no = co.course_no " +
+        //              "WHERE c.perm = ? AND o.quarter = ? AND o.year = ?";
+        
+        // List<CompletedCourse> grades = new ArrayList<>();
+        // try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        //     ps.setString(1, perm);
+        //     ps.setInt(2, prevQuarter);
+        //     ps.setInt(3, prevYear);
+        //     try (ResultSet rs = ps.executeQuery()) {
+        //         while (rs.next()) {
+        //             grades.add(new CompletedCourse(rs));
+        //         }
+        //     }
+        // }
+        // return grades;
 
         String sql = "SELECT c.*, o.course_no, o.quarter, o.year, co.title " +
-                     "FROM Completed_Course c " +
-                     "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
-                     "JOIN Courses co ON o.course_no = co.course_no " +
-                     "WHERE c.perm = ? AND o.quarter = ? AND o.year = ?";
-        
+             "FROM Completed_Course c " +
+             "JOIN Course_Offerings o ON c.enrollment_code = o.enrollment_code " +
+             "    AND o.quarter = " + prevQuarter + " AND o.year = " + prevYear + " " +
+             "JOIN Courses co ON o.course_no = co.course_no " +
+             "WHERE c.perm = '" + perm + "' " +
+             "AND c.quarter = " + prevQuarter + " AND c.year = " + prevYear;
+
         List<CompletedCourse> grades = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, perm);
-            ps.setInt(2, prevQuarter);
-            ps.setInt(3, prevYear);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    grades.add(new CompletedCourse(rs));
-                }
+        try (Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                grades.add(new CompletedCourse(rs));
             }
         }
         return grades;
@@ -810,12 +1371,44 @@ class UniversityDAO {
     }
 
     public static class GradeEntry {
-        public String perm;
-        public String grade;
+        private final String perm;
+        private final int enrollmentCode;
+        private final int quarter;
+        private final int year;
+        private final String grade;
 
-        public GradeEntry(String perm, String grade) {
+        public GradeEntry(
+            String perm,
+            int enrollmentCode,
+            int quarter,
+            int year,
+            String grade
+        ) {
             this.perm = perm;
+            this.enrollmentCode = enrollmentCode;
+            this.quarter = quarter;
+            this.year = year;
             this.grade = grade;
+        }
+
+        public String getPerm() {
+            return perm;
+        }
+
+        public int getEnrollmentCode() {
+            return enrollmentCode;
+        }
+
+        public int getQuarter() {
+            return quarter;
+        }
+
+        public int getYear() {
+            return year;
+        }
+
+        public String getGrade() {
+            return grade;
         }
     }
 
@@ -894,7 +1487,7 @@ class UniversityDAO {
     /**
      * Check if student can enroll in a specific course (all validations).
      */
-    public EnrollmentValidation canEnrollInCourse(String perm, int enrollCode) throws SQLException {
+    public EnrollmentValidation canEnrollInCourse(String perm, int enrollCode, int year, int quarter) throws SQLException {
         List<String> errors = new ArrayList<>();
         
         // Check if student exists
@@ -919,7 +1512,7 @@ class UniversityDAO {
         }
 
         // Check prerequisites
-        CourseOffering offering = getCourseOffering(enrollCode);
+        CourseOffering offering = getCourseOffering(enrollCode, year, quarter);
         if (offering != null && !hasCompletedPrerequisites(perm, offering.courseNo)) {
             errors.add("Prerequisites not met for " + offering.courseNo);
         }
