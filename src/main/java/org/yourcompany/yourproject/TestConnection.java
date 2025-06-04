@@ -157,9 +157,9 @@ public class TestConnection {
                 dao.addPrerequisite("CS170", "CS154");
                 dao.addPrerequisite("CS160", "CS026");
                 dao.addPrerequisite("EC154", "CS026");
-                dao.addPrerequisite("EC152", "CS026");
+                // dao.addPrerequisite("EC152", "CS026");
                 dao.addPrerequisite("EC154", "EC152");
-                dao.addPrerequisite("CS154", "CS130");
+                // dao.addPrerequisite("CS154", "CS130");
 
                 // --- Major requirements (Part 3) ---
                 System.out.println("-- Adding major requirements --");
