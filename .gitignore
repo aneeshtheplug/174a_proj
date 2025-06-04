@@ -1,1 +1,15 @@
 .env
+
+# Ignore all compiled class files
+*.class
+
+# Ignore the entire target directory (Maven builds)
+target/
+
+# Ignore IDE-specific files (e.g., IntelliJ)
+.idea/
+*.iml
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
